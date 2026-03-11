@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { LoginComponent } from './core/components/login/login.component';
+// import { LoginComponent } from './core/components/login/login.component';
 
 import { EmployeeModule } from './features/employee/employee.module';
 
@@ -15,8 +15,8 @@ import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    LoginComponent
+    AppComponent
+    // LoginComponent
   ],
   imports: [
     BrowserModule,

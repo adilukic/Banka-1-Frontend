@@ -1,0 +1,82 @@
+<div class="login-page">
+  <div class="login-card">
+    <h1 class="login-title">Sign in</h1>
+
+    <form class="login-form" (ngSubmit)="onSubmit()">
+      <div class="input-row">
+        <input
+          class="login-input"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="Email"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="input-row password-row">
+        <div class="password-wrapper">
+          <input
+            class="login-input password-input"
+            [type]="isPasswordVisible ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Password"
+            autocomplete="current-password"
+          />
+
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="isPasswordVisible ? 'Hide password' : 'Show password'"
+          >
+            <svg
+              *ngIf="!isPasswordVisible"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"
+              ></path>
+              <path
+                d="M4 4l16 16"
+                class="slash"
+              ></path>
+            </svg>
+
+            <svg
+              *ngIf="isPasswordVisible"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="forgot-link"
+          (click)="goToForgotPassword()"
+        >
+          Forgot password?
+        </button>
+      </div>
+
+      <p class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="submit"
+        class="login-button"
+        [disabled]="isLoading"
+      >
+        {{ isLoading ? 'Logging in...' : 'Login' }}
+      </button>
+    </form>
+  </div>
+</div>

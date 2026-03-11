@@ -19,6 +19,19 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
 
   /**
+   * Returns true if request should be sent without JWT Authorization header.
+   * @param url Request URL
+   */
+  private shouldSkipAuthHeader(url: string): boolean {
+    return (
+      url.includes('/auth/login') ||
+      url.includes('/auth/forgot-password') ||
+      url.includes('/auth/resetPassword') ||
+      url.includes('/auth/activate')
+    );
+  }
+
+  /**
    * Interceptuje svaki HTTP zahtev i dodaje Authorization header sa JWT tokenom.
    * Ukoliko server vrati 401, pokušava da osveži token i ponovi originalni zahtev.
    * @param req - Originalni HTTP zahtev
@@ -28,7 +41,7 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getToken();
 
-    if (!token || req.url.includes('/auth/login') || req.url.includes('/auth/refresh')) {
+    if (!token || this.shouldSkipAuthHeader(req.url)) {
       return next.handle(req);
     }
 
@@ -69,8 +82,8 @@ export class AuthInterceptor implements HttpInterceptor {
       return this.authService.refreshToken().pipe(
         switchMap(res => {
           this.isRefreshing = false;
-          this.refreshTokenSubject.next(res.token);
-          return next.handle(this.addToken(req, res.token));
+          this.refreshTokenSubject.next(res.jwt);
+          return next.handle(this.addToken(req, res.jwt));
         }),
         catchError(err => {
           this.isRefreshing = false;

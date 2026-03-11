@@ -28,8 +28,12 @@ const routes: Routes = [
     canActivate: [authGuard]
   },
 
-  // 4. POČETNA STRANA (Preusmerava na tabelu)
-  { path: '', redirectTo: '/employees', pathMatch: 'full' }
+  // 4. POČETNA STRANA (Landing page)
+  {
+    path: '',
+    loadChildren: () =>
+      import('./features/auth/auth.module').then((m) => m.AuthModule)
+  }
 ];
 
 @NgModule({

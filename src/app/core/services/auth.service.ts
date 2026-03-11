@@ -1,19 +1,30 @@
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import {Injectable} from '@angular/core';
+import {Router} from '@angular/router';
+import {HttpClient} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
+import {tap, catchError} from 'rxjs/operators';
+import {environment} from '../../../environments/environment';
 
-type LoginResponse = { token: string; permissions: string[] };
-type RefreshResponse = { token: string };
+type LoginResponse = {
+  jwt: string;
+  refreshToken: string;
+  role: string;
+  permissions: string[];
+};
+type RefreshResponse = {
+  jwt: string;
+  refreshToken: string;
+  role: string;
+  permissions: string[];
+};
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class AuthService {
   private readonly TOKEN_KEY = 'authToken';
   private readonly USER_KEY = 'loggedUser';
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(private router: Router, private http: HttpClient) {
+  }
 
   /**
    * Prijavljuje korisnika sa email-om i lozinkom.
@@ -24,13 +35,18 @@ export class AuthService {
    */
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, {email, password})
       .pipe(
         tap(res => {
-          localStorage.setItem(this.TOKEN_KEY, res.token);
+          localStorage.setItem(this.TOKEN_KEY, res.jwt);
+          localStorage.setItem('refreshToken', res.refreshToken);
           localStorage.setItem(
             this.USER_KEY,
-            JSON.stringify({ email, permissions: res.permissions })
+            JSON.stringify({
+              email,
+              role: res.role,
+              permissions: res.permissions
+            })
           );
         })
       );
@@ -47,18 +63,103 @@ export class AuthService {
   }
 
   /**
+   * Sends forgot password request for the provided email.
+   * @param email User email address
+   * @returns Observable without response body payload details
+   */
+  public forgotPassword(email: string): Observable<unknown> {
+    return this.http.post<unknown>(`${environment.apiUrl}/auth/forgot-password`, {
+      email
+    });
+  }
+
+  /**
+   * Validates reset password confirmation token and returns confirmation id.
+   * @param confirmationToken Token from reset password email link
+   */
+  public checkResetPasswordToken(confirmationToken: string): Observable<number> {
+    return this.http.get<number>(
+      `${environment.apiUrl}/auth/checkResetPassword`,
+      {
+        params: { confirmationToken }
+      }
+    );
+  }
+
+  /**
+   * Sends reset password request.
+   * @param id Confirmation id returned by checkResetPassword endpoint
+   * @param confirmationToken Token from URL
+   * @param password New password
+   */
+  public resetPassword(
+    id: number,
+    confirmationToken: string,
+    password: string
+  ): Observable<unknown> {
+    return this.http.post<unknown>(`${environment.apiUrl}/auth/resetPassword`, {
+      id,
+      confirmationToken,
+      password
+    });
+  }
+
+  /**
+   * Validates activate confirmation token and returns confirmation id.
+   * @param confirmationToken Token from activation email link
+   */
+  public checkActivateToken(confirmationToken: string): Observable<number> {
+    return this.http.get<number>(
+      `${environment.apiUrl}/auth/checkActivate`,
+      {
+        params: { confirmationToken }
+      }
+    );
+  }
+
+  /**
+   * Sends activate account request.
+   * @param id Confirmation id returned by checkActivate endpoint
+   * @param confirmationToken Token from URL
+   * @param password New password
+   */
+  public activateAccount(
+    id: number,
+    confirmationToken: string,
+    password: string
+  ): Observable<unknown> {
+    return this.http.post<unknown>(`${environment.apiUrl}/auth/activate`, {
+      id,
+      confirmationToken,
+      password
+    });
+  }
+
+  /**
    * Osvežava JWT token slanjem zahteva na refresh endpoint.
    * Novi token se automatski čuva u localStorage.
    * U slučaju greške, korisnik se odjavljuje.
    * @returns Observable sa novim JWT tokenom
    */
   refreshToken(): Observable<RefreshResponse> {
-    const token = this.getToken();
+    const refreshToken = localStorage.getItem('refreshToken');
+
     return this.http
-      .post<RefreshResponse>(`${environment.apiUrl}/auth/refresh`, { token })
+      .post<RefreshResponse>(`${environment.apiUrl}/auth/refresh`, { refreshToken })
       .pipe(
         tap(res => {
-          localStorage.setItem(this.TOKEN_KEY, res.token);
+          localStorage.setItem(this.TOKEN_KEY, res.jwt);
+          localStorage.setItem('refreshToken', res.refreshToken);
+
+          const user = this.getLoggedUser();
+          localStorage.setItem(
+            this.USER_KEY,
+            JSON.stringify({
+              email: user?.email ?? '',
+              role: res.role,
+              permissions: res.permissions
+            })
+          );
         }),
         catchError(err => {
           this.logout();
@@ -92,6 +193,40 @@ export class AuthService {
    */
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Extracts user id from JWT payload stored in localStorage.
+   * @returns User id or null if token is missing/invalid
+   */
+  public getUserIdFromToken(): number | null {
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payloadPart = token.split('.')[1];
+
+      if (!payloadPart) {
+        return null;
+      }
+
+      const normalizedPayload = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = atob(normalizedPayload);
+      const payload = JSON.parse(decodedPayload) as { id?: number | string };
+
+      if (payload.id === undefined || payload.id === null) {
+        return null;
+      }
+
+      const parsedId = Number(payload.id);
+
+      return Number.isNaN(parsedId) ? null : parsedId;
+    } catch {
+      return null;
+    }
   }
 
   /**
