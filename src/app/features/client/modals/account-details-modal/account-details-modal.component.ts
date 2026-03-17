@@ -1,9 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Account } from '../../models/account.model';
 
 @Component({
   selector: 'app-account-details-modal',
   templateUrl: './account-details-modal.component.html',
+  standalone: true,
+  imports: [CommonModule],
   styleUrls: ['./account-details-modal.component.scss']
 })
 export class AccountDetailsModalComponent {

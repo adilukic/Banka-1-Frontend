@@ -5,12 +5,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AccountService } from '../../services/account.service';
 import { Account } from '../../models/account.model';
 import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
+import { AccountDetailsModalComponent } from '../../modals/account-details-modal/account-details-modal.component';
 
 @Component({
   selector: 'app-account-list',
   templateUrl: './account-list.component.html',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, AccountDetailsModalComponent, NavbarComponent],
   styleUrls: ['./account-list.component.scss']
 })
 export class AccountListComponent implements OnInit {

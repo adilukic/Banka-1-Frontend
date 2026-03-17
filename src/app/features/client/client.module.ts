@@ -6,12 +6,12 @@ import {AccountDetailsModalComponent} from "./modals/account-details-modal/accou
 
 @NgModule({
   declarations: [
-    AccountListComponent,
-    AccountDetailsModalComponent
   ],
   imports: [
     CommonModule,
-    ClientRoutingModule
+    ClientRoutingModule,
+    AccountListComponent,
+    AccountDetailsModalComponent
   ]
 })
 export class ClientModule {}
