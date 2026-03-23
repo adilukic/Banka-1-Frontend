@@ -55,7 +55,16 @@
 
             <div class="form-group half-width">
               <label>Šifra plaćanja</label>
-              <input type="text" formControlName="paymentCode" class="form-control" placeholder="289" [class.is-invalid]="paymentForm.get('paymentCode')?.invalid && paymentForm.get('paymentCode')?.touched">
+              <select formControlName="paymentCode" class="form-control" [class.is-invalid]="paymentForm.get('paymentCode')?.invalid && paymentForm.get('paymentCode')?.touched">
+                <option value="220">220 - Promet robe i usluga</option>
+                <option value="221">221 - Promet usluga</option>
+                <option value="222">222 - Usluge javnih preduzeća</option>
+                <option value="240">240 - Zarade i druga primanja zaposlenih</option>
+                <option value="241">241 - Neoporeziva primanja zaposlenih</option>
+                <option value="253">253 - Uplata javnih prihoda (porezi)</option>
+                <option value="289">289 - Transakcije po nalogu građana</option>
+                <option value="290">290 - Druge transakcije</option>
+              </select>
               <span class="error-msg" *ngIf="paymentForm.get('paymentCode')?.invalid && paymentForm.get('paymentCode')?.touched">Izaberite šifru plaćanja.</span>
             </div>
           </div>
