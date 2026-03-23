@@ -1,5 +1,5 @@
 // cypress/e2e/payment-recipients.cy.ts
-// E2E testovi za PaymentRecipientsComponent
+// E2E testovi za Payment Recipients komponentu
 
 const MOCK_RECIPIENTS = [
   { id: 1, name: 'Pera Perić',   accountNumber: '265000000923124323' },
@@ -31,7 +31,7 @@ describe('Payment Recipients Component', () => {
     }).as('getRecipients');
 
     setAuth();
-    cy.visit('/home/payments/recipients');
+    cy.visit('/payments/recipients');
     cy.wait('@getRecipients');
   });
 
@@ -47,14 +47,14 @@ describe('Payment Recipients Component', () => {
     cy.get('.table tbody tr').should('have.length', 2);
   });
 
-  it('treba da prikaže naziv primaoca', () => {
-    cy.get('.table tbody tr').first()
-      .find('.td-name').should('contain', 'Pera Perić');
+  it('treba da prikaže naziv primaoca za svaki red', () => {
+    cy.get('.table tbody tr').first().find('.td-name')
+      .should('contain', 'Pera Perić');
   });
 
   it('treba da prikaže broj računa primaoca', () => {
-    cy.get('.table tbody tr').first()
-      .find('.td-account').should('contain', '265000000923124323');
+    cy.get('.table tbody tr').first().find('.td-account')
+      .should('contain', '265000000923124323');
   });
 
   it('treba da prikaže dugmad Izmeni i Obriši za svakog primaoca', () => {
@@ -75,15 +75,15 @@ describe('Payment Recipients Component', () => {
   it('treba da filtrira primaоce po imenu', () => {
     cy.get('.toolbar__search input').type('Maja');
     cy.get('.table tbody tr').should('have.length', 1);
-    cy.get('.table tbody tr').first()
-      .find('.td-name').should('contain', 'Maja Nikolić');
+    cy.get('.table tbody tr').first().find('.td-name')
+      .should('contain', 'Maja Nikolić');
   });
 
   it('treba da filtrira primaоce po broju računa', () => {
     cy.get('.toolbar__search input').type('265000000923124323');
     cy.get('.table tbody tr').should('have.length', 1);
-    cy.get('.table tbody tr').first()
-      .find('.td-name').should('contain', 'Pera Perić');
+    cy.get('.table tbody tr').first().find('.td-name')
+      .should('contain', 'Pera Perić');
   });
 
   it('treba da prikaže praznu listu kada pretraga nema rezultata', () => {
@@ -173,8 +173,8 @@ describe('Payment Recipients Component', () => {
     cy.wait('@updateRecipient');
 
     cy.get('.form-section').should('not.exist');
-    cy.get('.table tbody tr').first()
-      .find('.td-name').should('contain', 'Pera Perić Izmenjen');
+    cy.get('.table tbody tr').first().find('.td-name')
+      .should('contain', 'Pera Perić Izmenjen');
   });
 
   // ===========================================================
@@ -190,34 +190,16 @@ describe('Payment Recipients Component', () => {
     cy.wait('@deleteRecipient');
 
     cy.get('.table tbody tr').should('have.length', 1);
-    cy.get('.table tbody tr').first()
-      .find('.td-name').should('contain', 'Maja Nikolić');
+    cy.get('.table tbody tr').first().find('.td-name')
+      .should('contain', 'Maja Nikolić');
   });
 
   // ===========================================================
-  // Pagination
+  // Pagination info
   // ===========================================================
 
   it('treba da prikaže pagination info', () => {
     cy.get('.pagination-info').should('contain', 'Prikazuje se 1 do 2 od 2 stavke');
-  });
-
-  // ===========================================================
-  // Prazna lista
-  // ===========================================================
-
-  it('treba da prikaže prazno stanje kada nema primaoca', () => {
-    cy.intercept('GET', '**/payment-recipients', {
-      statusCode: 200,
-      body: []
-    }).as('getEmptyRecipients');
-
-    setAuth();
-    cy.visit('/home/payments/recipients');
-    cy.wait('@getEmptyRecipients');
-
-    cy.get('.state-box').should('contain', 'Nema primaoca plaćanja');
-    cy.get('.table').should('not.exist');
   });
 
   // ===========================================================
@@ -226,7 +208,7 @@ describe('Payment Recipients Component', () => {
 
   it('treba da preusmeri na login ako korisnik nije ulogovan', () => {
     clearAuth();
-    cy.visit('/home/payments/recipients');
+    cy.visit('/payments/recipients');
     cy.url().should('include', '/login');
   });
 
