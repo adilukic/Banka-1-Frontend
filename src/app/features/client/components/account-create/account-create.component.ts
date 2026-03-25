@@ -52,14 +52,27 @@ interface CompanyPayload {
 }
 
 /**
- * Payload za kreiranje računa.
+ * Payload za kreiranje FX računa.
  */
-interface AccountCreatePayload {
+interface FxAccountCreatePayload {
   nazivRacuna: string;
   idVlasnika: number;
   jmbg: string;
   currencyCode: string;
-  tipRacuna: AccountKind;
+  tipRacuna: AccountOwnerType;
+  initialBalance: number;
+  createCard: boolean;
+  firma?: CompanyPayload;
+}
+
+/**
+ * Payload za kreiranje tekućeg računa.
+ */
+interface CheckingAccountCreatePayload {
+  nazivRacuna: string;
+  idVlasnika: number;
+  jmbg: string;
+  vrstaRacuna: string;
   initialBalance: number;
   createCard: boolean;
   firma?: CompanyPayload;
@@ -223,73 +236,73 @@ export class AccountCreateComponent implements OnInit, OnDestroy {
       return;
     }
 
-// { OVAKO IZGLEDA OČEKIVANI PAYLOAD ZA KREIRANJE FX RAČUNA, API JE POST APIURL/employee/accounts/fx
-//   "nazivRacuna": "string",
-//   "idVlasnika": 0,
-//   "jmbg": "string",
-//   "currencyCode": "RSD",
-//   "tipRacuna": "PERSONAL",
-//   "initialBalance": 0,
-//   "createCard": true,
-//   "firma": {
-//     "naziv": "string",
-//     "maticniBroj": "54635850",
-//     "poreskiBroj": "656614034",
-//     "sifraDelatnosti": "string",
-//     "adresa": "string",
-//     "vlasnik": 0
-//   }
-// }
+    const companyPayload: CompanyPayload | undefined = this.isBusiness()
+      ? {
+          naziv: this.form.get('companyName')?.value,
+          maticniBroj: this.form.get('companyNumber')?.value,
+          poreskiBroj: this.form.get('companyTaxId')?.value,
+          sifraDelatnosti: this.form.get('companyActivityCode')?.value,
+          adresa: this.form.get('companyAddress')?.value,
+          vlasnik: this.form.get('ownerId')?.value
+        }
+      : undefined;
 
+    const ownerId = this.form.get('ownerId')?.value;
+    const createCard = this.form.get('createCard')?.value;
+    const initialBalance = this.form.get('initialBalance')?.value;
 
-// { A OVAKO ZA CHECKING RAČUN, API JE POST APIURL/employee/accounts/checking
-//   "nazivRacuna": "string",
-//   "idVlasnika": 0,
-//   "jmbg": "string",
-//   "vrstaRacuna": "STANDARDNI",
-//   "firma": {
-//     "naziv": "string",
-//     "maticniBroj": "82632648",
-//     "poreskiBroj": "123501003",
-//     "sifraDelatnosti": "string",
-//     "adresa": "string",
-//     "vlasnik": 0
-//   },
-//   "initialBalance": 0,
-//   "createCard": true
-// }
-
-
-    const payload: AccountCreatePayload = {
-      tipRacuna: this.selectedKind as AccountKind,
-      currencyCode: this.selectedKind?.toString(),
-      idVlasnika: this.form.get('ownerId')?.value,
-      createCard: this.form.get('createCard')?.value,
-      initialBalance: this.form.get('initialBalance')?.value,
-      nazivRacuna: '',
-      jmbg: ''
-    };
-
-    if (this.isBusiness()) {
-      payload.firma = {
-        naziv: this.form.get('companyName')?.value,
-        maticniBroj: this.form.get('companyNumber')?.value,
-        poreskiBroj: this.form.get('companyTaxId')?.value,
-        sifraDelatnosti: this.form.get('companyActivityCode')?.value,    
-        adresa: this.form.get('companyAddress')?.value,
-        vlasnik: this.form.get('ownerId')?.value
+    if (this.selectedKind === AccountKind.FX) {
+      const payload: FxAccountCreatePayload = {
+        nazivRacuna: '',
+        idVlasnika: ownerId,
+        jmbg: '',
+        currencyCode: this.selectedCurrency ?? 'EUR',
+        tipRacuna: this.selectedOwnerType ?? AccountOwnerType.PERSONAL,
+        initialBalance,
+        createCard
       };
-    }
-
-    // Call backend to create account and navigate back on success
-    this.accountService.createAccount(payload).subscribe({
-      next: () => this.router.navigate(['/employees']),
-      error: (err: unknown) => {
-        // Log error - UI error handling can be added later
-        // eslint-disable-next-line no-console
-        console.error('Failed to create account', err);
+      if (companyPayload) {
+        payload.firma = companyPayload;
       }
-    });
+
+      this.accountService.createFxAccount(payload).subscribe({
+        next: () => this.router.navigate(['/employees']),
+        error: (err: unknown) => {
+          console.error('Failed to create FX account', err);
+        }
+      });
+    } else {
+      const subtypeMap: Record<string, string> = {
+        'standardni': 'STANDARDNI',
+        'štedni': 'STEDNI',
+        'penzionerski': 'PENZIONERSKI',
+        'za mlade': 'ZA_MLADE',
+        'za studente': 'ZA_STUDENTE',
+        'za nezaposlene': 'ZA_NEZAPOSLENE',
+        'DOO': 'DOO',
+        'AD': 'AD',
+        'fondacija': 'FONDACIJA'
+      };
+
+      const payload: CheckingAccountCreatePayload = {
+        nazivRacuna: '',
+        idVlasnika: ownerId,
+        jmbg: '',
+        vrstaRacuna: subtypeMap[this.selectedSubtype ?? ''] ?? 'STANDARDNI',
+        initialBalance,
+        createCard
+      };
+      if (companyPayload) {
+        payload.firma = companyPayload;
+      }
+
+      this.accountService.createCheckingAccount(payload).subscribe({
+        next: () => this.router.navigate(['/employees']),
+        error: (err: unknown) => {
+          console.error('Failed to create checking account', err);
+        }
+      });
+    }
   }
 
   /**

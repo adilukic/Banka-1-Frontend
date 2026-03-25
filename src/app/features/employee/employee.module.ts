@@ -8,6 +8,7 @@ import { EmployeeCreateComponent } from './components/employee-create/employee-c
 import { EmployeeEditComponent } from './components/employee-edit/employee-edit.component';
 import { AccountManagementComponent } from './account-management/account-management.component';
 import { AccountCardsPlaceholderComponent } from './account-cards-placeholder/account-cards-placeholder.component';
+import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { AccountCardsPlaceholderComponent } from './account-cards-placeholder/ac
     ReactiveFormsModule,
     FormsModule,
     RouterModule,
-    AccountManagementComponent
+    AccountManagementComponent,
+    NavbarComponent
   ]
 })
 export class EmployeeModule { }

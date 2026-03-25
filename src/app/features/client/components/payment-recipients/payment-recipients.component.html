@@ -1,108 +1,84 @@
-<div class="page-wrapper">
-  <app-navbar></app-navbar>
+<app-navbar></app-navbar>
 
-  <main class="content">
-    <h1 class="page-title">PRIMAOCI PLAĆANJA</h1>
+<div class="page-layout">
+  <div class="page-content">
+    <h1 class="text-2xl font-bold text-foreground mb-6">PRIMAOCI PLAĆANJA</h1>
 
-    <!-- Loading -->
-    <div class="state-box" *ngIf="isLoading">
-      <p>Učitavanje podataka...</p>
+    <div *ngIf="isLoading" class="flex justify-center items-center p-12">
+      <svg class="w-8 h-8 text-primary animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
     </div>
 
-    <div class="panel" *ngIf="!isLoading">
-
+    <div *ngIf="!isLoading" class="space-y-4">
       <!-- Toolbar -->
-      <div class="toolbar">
-        <div class="toolbar__search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            type="text"
-            placeholder="Pretraži šablone"
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearch()"
-          />
+      <div class="z-card p-4">
+        <div class="flex items-center gap-3">
+          <div class="relative flex-1">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Pretraži šablone" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" class="z-input pl-10" />
+          </div>
+          <button class="z-btn-primary z-btn-sm" type="button" (click)="openAddForm()">DODAJ +</button>
         </div>
-        <button class="btn-add" type="button" (click)="openAddForm()">
-          DODAJ +
-        </button>
       </div>
 
-      <!-- Forma -->
-      <div class="form-section" *ngIf="formMode">
-        <h3 class="form-title">
+      <!-- Add/Edit form -->
+      <div class="z-card p-5" *ngIf="formMode">
+        <h3 class="text-base font-semibold text-foreground mb-4">
           {{ formMode === 'add' ? 'Dodaj primaoca' : 'Izmeni primaoca' }}
         </h3>
-
-        <div class="form-row">
-          <div class="form-col">
-            <label class="form-label">Naziv</label>
-            <input
-              class="form-input"
-              type="text"
-              placeholder="Ime primaoca"
-              [(ngModel)]="formName"
-            />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="z-label">Naziv</label>
+            <input class="z-input" type="text" placeholder="Ime primaoca" [(ngModel)]="formName" />
           </div>
-          <div class="form-col">
-            <label class="form-label">Broj računa</label>
-            <input
-              class="form-input"
-              type="text"
-              placeholder="265000000000000000"
-              [(ngModel)]="formAccountNumber"
-            />
+          <div>
+            <label class="z-label">Broj računa</label>
+            <input class="z-input" type="text" placeholder="265000000000000000" [(ngModel)]="formAccountNumber" />
           </div>
         </div>
-
-        <span class="error-msg" *ngIf="formError">{{ formError }}</span>
-
-        <div class="form-btns">
-          <button type="button" class="btn-cancel" (click)="closeForm()" [disabled]="formLoading">
-            Poništi
-          </button>
-          <button type="button" class="btn-submit" (click)="saveRecipient()" [disabled]="formLoading">
+        <p class="z-error" *ngIf="formError">{{ formError }}</p>
+        <div class="flex justify-end gap-3 mt-4">
+          <button type="button" class="z-btn-outline z-btn-sm" (click)="closeForm()" [disabled]="formLoading">Poništi</button>
+          <button type="button" class="z-btn-primary z-btn-sm" (click)="saveRecipient()" [disabled]="formLoading">
             {{ formLoading ? 'Čuvanje...' : 'POTVRDI' }}
           </button>
         </div>
       </div>
 
-      <!-- Prazna lista -->
-      <div class="state-box" *ngIf="filteredRecipients.length === 0 && !formMode">
+      <!-- Empty -->
+      <div *ngIf="filteredRecipients.length === 0 && !formMode" class="text-center p-12 text-muted-foreground text-sm">
         <p>Nema primaoca plaćanja.</p>
       </div>
 
-      <!-- Tabela -->
-      <table class="table" *ngIf="filteredRecipients.length > 0">
-        <thead>
-        <tr>
-          <th>NAZIV</th>
-          <th>BROJ RAČUNA</th>
-          <th>OPCIJE</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let recipient of filteredRecipients">
-          <td class="td-name">{{ recipient.name }}</td>
-          <td class="td-account">{{ recipient.accountNumber }}</td>
-          <td class="td-actions">
-            <button class="btn-edit" type="button" (click)="openEditForm(recipient)">Izmeni</button>
-            <button class="btn-delete" type="button" (click)="deleteRecipient(recipient)">Obriši</button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+      <!-- Table -->
+      <div class="z-card overflow-hidden" *ngIf="filteredRecipients.length > 0">
+        <table class="z-table">
+          <thead>
+            <tr>
+              <th>NAZIV</th>
+              <th>BROJ RAČUNA</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let recipient of filteredRecipients">
+              <td class="font-medium">{{ recipient.name }}</td>
+              <td class="text-muted-foreground font-mono text-sm">{{ recipient.accountNumber }}</td>
+              <td class="text-right">
+                <div class="flex gap-1 justify-end">
+                  <button class="z-btn-outline z-btn-sm" type="button" (click)="openEditForm(recipient)">Izmeni</button>
+                  <button class="z-btn-destructive z-btn-sm" type="button" (click)="deleteRecipient(recipient)">Obriši</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-      <!-- Pagination -->
-      <div class="pagination" *ngIf="filteredRecipients.length > 0">
-        <span class="pagination-info">
+        <div class="px-5 py-3 border-t border-border text-sm text-muted-foreground">
           Prikazuje se 1 do {{ totalCount }} od {{ totalCount }} stavke
-        </span>
-        <button class="page-btn active" type="button">1</button>
+        </div>
       </div>
-
     </div>
-  </main>
+  </div>
 </div>

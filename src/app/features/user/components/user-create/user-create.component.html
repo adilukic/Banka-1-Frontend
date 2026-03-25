@@ -1,80 +1,61 @@
-<!-- <div class="user-create">
-  <h2>Kreiranje korisnika</h2>
+<app-navbar></app-navbar>
 
-  <form #userForm="ngForm" (ngSubmit)="submit(userForm)">
-    <div>
-      <label for="firstName">Ime</label>
-      <input id="firstName" [(ngModel)]="firstName" name="firstName" required />
-      <small class="error" *ngIf="userForm.submitted && !firstName">Ime je obavezno.</small>
-    </div>
-
-    <div>
-      <label for="lastName">Prezime</label>
-      <input id="lastName" [(ngModel)]="lastName" name="lastName" required />
-      <small class="error" *ngIf="userForm.submitted && !lastName">Prezime je obavezno.</small>
-    </div>
-
-    <div>
-      <label for="jmbg">JMBG</label>
-      <input id="jmbg" [(ngModel)]="jmbg" name="jmbg" />
-    </div>
-
-    <div class="actions">
-      <button type="submit" [disabled]="submitting">Kreiraj</button>
-    </div>
-  </form>
-</div> -->
-<div class="user-create-page">
-  <div class="user-create-card">
-    <div class="user-create-header">
-      <h2>Novi klijent</h2>
-      <p>Unesite osnovne podatke za kreiranje novog klijenta.</p>
-    </div>
-
-    <form #userForm="ngForm" (ngSubmit)="submit(userForm)" class="user-create-form">
-      <div class="form-group">
-        <label for="firstName">Ime</label>
-        <input
-          id="firstName"
-          [(ngModel)]="firstName"
-          name="firstName"
-          required
-          placeholder="Unesite ime"
-        />
-        <small class="error" *ngIf="userForm.submitted && !firstName">
-          Ime je obavezno.
-        </small>
+<div class="page-layout">
+  <div class="page-content max-w-lg">
+    <div class="z-card">
+      <div class="mb-5">
+        <h2 class="text-xl font-bold">Novi klijent</h2>
+        <p class="text-sm text-muted-foreground mt-1">Unesite osnovne podatke za kreiranje novog klijenta.</p>
       </div>
 
-      <div class="form-group">
-        <label for="lastName">Prezime</label>
-        <input
-          id="lastName"
-          [(ngModel)]="lastName"
-          name="lastName"
-          required
-          placeholder="Unesite prezime"
-        />
-        <small class="error" *ngIf="userForm.submitted && !lastName">
-          Prezime je obavezno.
-        </small>
-      </div>
+      <form #userForm="ngForm" (ngSubmit)="submit(userForm)" class="space-y-4">
+        <div>
+          <label class="z-label" for="firstName">Ime</label>
+          <input
+            id="firstName"
+            class="z-input"
+            [(ngModel)]="firstName"
+            name="firstName"
+            required
+            placeholder="Unesite ime"
+          />
+          <p class="z-error" *ngIf="userForm.submitted && !firstName">
+            Ime je obavezno.
+          </p>
+        </div>
 
-      <div class="form-group">
-        <label for="jmbg">JMBG</label>
-        <input
-          id="jmbg"
-          [(ngModel)]="jmbg"
-          name="jmbg"
-          placeholder="Unesite JMBG"
-        />
-      </div>
+        <div>
+          <label class="z-label" for="lastName">Prezime</label>
+          <input
+            id="lastName"
+            class="z-input"
+            [(ngModel)]="lastName"
+            name="lastName"
+            required
+            placeholder="Unesite prezime"
+          />
+          <p class="z-error" *ngIf="userForm.submitted && !lastName">
+            Prezime je obavezno.
+          </p>
+        </div>
 
-      <div class="actions">
-        <button type="submit" class="btn-primary" [disabled]="submitting">
-          {{ submitting ? 'Kreiranje...' : 'Kreiraj' }}
-        </button>
-      </div>
-    </form>
+        <div>
+          <label class="z-label" for="jmbg">JMBG</label>
+          <input
+            id="jmbg"
+            class="z-input"
+            [(ngModel)]="jmbg"
+            name="jmbg"
+            placeholder="Unesite JMBG"
+          />
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="z-btn z-btn-primary z-btn-full" [disabled]="submitting">
+            {{ submitting ? 'Kreiranje...' : 'Kreiraj' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

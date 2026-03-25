@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 
 interface AccountCardPlaceholder {
   cardNumber: string;
@@ -22,7 +23,11 @@ export class AccountCardsPlaceholderComponent implements OnInit {
 
   cards: AccountCardPlaceholder[] = [];
 
-  constructor(private readonly route: ActivatedRoute) {}
+  constructor(private readonly route: ActivatedRoute, private readonly location: Location) {}
+
+  goBack(): void {
+    this.location.back();
+  }
 
   ngOnInit(): void {
     this.accountNumber = this.route.snapshot.queryParamMap.get('accountNumber') || '';

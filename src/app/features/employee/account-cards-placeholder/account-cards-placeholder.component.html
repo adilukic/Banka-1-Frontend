@@ -1,48 +1,46 @@
-<div class="account-cards-page">
-  <div class="content-wrapper">
-    <div class="page-header">
-      <div>
-        <h1>Kartice vezane za račun</h1>
+<div class="page-layout">
+  <div class="page-content">
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <button type="button" class="z-btn z-btn-ghost z-btn-sm" (click)="goBack()">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h1 class="text-2xl font-bold">Kartice vezane za račun</h1>
+    </div>
+
+    <!-- Account Info -->
+    <div class="z-card mb-6">
+      <h2 class="text-base font-semibold mb-4">Informacije o računu</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div>
+          <p class="text-xs text-muted-foreground mb-1">Broj računa</p>
+          <p class="text-sm font-medium font-mono">{{ accountNumber }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-muted-foreground mb-1">Vlasnik</p>
+          <p class="text-sm font-medium">{{ ownerName }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-muted-foreground mb-1">Tip vlasništva</p>
+          <p class="text-sm font-medium">{{ ownershipType }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-muted-foreground mb-1">Tip računa</p>
+          <p class="text-sm font-medium">{{ accountType }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-muted-foreground mb-1">Status računa</p>
+          <p class="text-sm font-medium">{{ status }}</p>
+        </div>
       </div>
     </div>
 
-    <div class="account-info-card">
-      <h2>Informacije o računu</h2>
-
-      <div class="account-info-grid">
-        <div class="info-item">
-          <span class="label">Broj računa</span>
-          <span class="value">{{ accountNumber }}</span>
-        </div>
-
-        <div class="info-item">
-          <span class="label">Vlasnik</span>
-          <span class="value">{{ ownerName }}</span>
-        </div>
-
-        <div class="info-item">
-          <span class="label">Tip vlasništva</span>
-          <span class="value">{{ ownershipType }}</span>
-        </div>
-
-        <div class="info-item">
-          <span class="label">Tip računa</span>
-          <span class="value">{{ accountType }}</span>
-        </div>
-
-        <div class="info-item">
-          <span class="label">Status računa</span>
-          <span class="value">{{ status }}</span>
-        </div>
+    <!-- Cards Table -->
+    <div class="z-card p-0 overflow-hidden">
+      <div class="px-5 py-4 border-b border-border">
+        <h2 class="text-base font-semibold">Spisak kartica</h2>
       </div>
-    </div>
-
-    <div class="table-card">
-      <div class="table-title-row">
-        <h2>Spisak kartica</h2>
-      </div>
-
-      <table class="cards-table">
+      <table class="z-table">
         <thead>
           <tr>
             <th>Broj kartice</th>
@@ -51,18 +49,14 @@
             <th>Status kartice</th>
           </tr>
         </thead>
-
         <tbody>
           <tr *ngFor="let card of cards; trackBy: trackByCard">
-            <td>{{ card.cardNumber }}</td>
-            <td>{{ card.ownerName }}</td>
+            <td class="font-mono text-sm">{{ card.cardNumber }}</td>
+            <td class="font-medium">{{ card.ownerName }}</td>
             <td>{{ card.ownerEmail }}</td>
             <td>
               <span
-                class="status-badge"
-                [class.active]="card.status === 'Aktivna'"
-                [class.blocked]="card.status === 'Blokirana'"
-                [class.deactivated]="card.status === 'Deaktivirana'"
+                [class]="card.status === 'Aktivna' ? 'z-badge-green' : card.status === 'Blokirana' ? 'z-badge-red' : 'z-badge-gray'"
               >
                 {{ card.status }}
               </span>

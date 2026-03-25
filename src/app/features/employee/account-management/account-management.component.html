@@ -1,83 +1,75 @@
 <app-navbar></app-navbar>
 
-<div class="account-management-page">
-  <div class="content-wrapper">
+<div class="page-layout">
+  <div class="page-content">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">Računi klijenata</h1>
+    </div>
 
-    <div class="page-header">
-      <div class="header-left">
-        <div class="filters-row">
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            (input)="onSearch()"
-            placeholder="Pretraga po imenu, prezimenu ili broju računa"
-          />
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <button type="button" class="header-icon-btn" title="Valuta">💲</button>
-        <span class="welcome-text">Dobro došli</span>
-        <div class="avatar-circle">👤</div>
+    <!-- Search -->
+    <div class="z-card mb-6">
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-muted-foreground shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input
+          type="text"
+          class="z-input"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          placeholder="Pretraga po imenu, prezimenu ili broju računa"
+        />
       </div>
     </div>
 
-    <h2 class="section-title">Računi klijenata</h2>
-
-    <div *ngIf="isLoading" class="loading">
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="z-card text-center py-12 text-muted-foreground">
       Učitavanje...
     </div>
 
-    <div *ngIf="!isLoading && filteredAccounts.length === 0" class="empty">
+    <!-- Empty -->
+    <div *ngIf="!isLoading && filteredAccounts.length === 0" class="z-card text-center py-12 text-muted-foreground">
       Nema podataka za prikaz.
     </div>
 
-    <div *ngIf="!isLoading && filteredAccounts.length > 0" class="table-card">
-      <table class="accounts-table">
+    <!-- Table -->
+    <div *ngIf="!isLoading && filteredAccounts.length > 0" class="z-card p-0 overflow-hidden">
+      <table class="z-table">
         <thead>
           <tr>
-            <th>Ime <span class="sort-icon">↕</span></th>
-            <th>Broj računa <span class="sort-icon">↕</span></th>
+            <th>Ime</th>
+            <th>Broj računa</th>
             <th>Vrsta</th>
-            <th>Tip vlasnistva</th>
+            <th>Tip vlasništva</th>
             <th>Status</th>
-            <th>Akcija</th>
+            <th class="text-right">Akcija</th>
           </tr>
         </thead>
-
         <tbody>
-<tr
-  *ngFor="let account of filteredAccounts; trackBy: trackByAccount"
-  class="clickable-row"
-  (click)="openAccountCards(account)"
->            <td>{{ account.ownerName }}</td>
-            <td>{{ account.accountNumber }}</td>
-
+          <tr
+            *ngFor="let account of filteredAccounts; trackBy: trackByAccount"
+            class="cursor-pointer hover:bg-muted/50"
+            (click)="openAccountCards(account)"
+          >
+            <td class="font-medium">{{ account.ownerName }}</td>
+            <td class="font-mono text-sm">{{ account.accountNumber }}</td>
             <td>
-              <span class="pill">
-                {{ getAccountType(account) }}
-              </span>
+              <span class="z-badge-blue">{{ getAccountType(account) }}</span>
             </td>
-
             <td>{{ getOwnershipType(account) }}</td>
-
             <td>
               <span
-                class="status-badge"
-                [class.active]="account.status === 'ACTIVE'"
-                [class.inactive]="account.status === 'INACTIVE'"
+                [class]="account.status === 'ACTIVE' ? 'z-badge-green' : 'z-badge-red'"
               >
                 {{ getStatusLabel(account.status) }}
               </span>
             </td>
-
-            <td class="actions">
+            <td class="text-right">
               <button
                 type="button"
-                class="action-btn"
-                [class.activate]="account.status !== 'ACTIVE'"
-                [class.deactivate]="account.status === 'ACTIVE'"
-                (click)="$event.stopPropagation(); openConfirmModal(account)"              >
+                class="z-btn z-btn-sm"
+                [class]="account.status === 'ACTIVE' ? 'z-btn-destructive' : 'z-btn-primary'"
+                (click)="$event.stopPropagation(); openConfirmModal(account)"
+              >
                 {{ account.status === 'ACTIVE' ? 'Deaktiviraj' : 'Aktiviraj' }}
               </button>
             </td>
@@ -86,33 +78,27 @@
       </table>
     </div>
 
-    <div *ngIf="showConfirmModal" class="modal-backdrop">
-      <div class="confirm-modal">
-        <div class="modal-header">
-          <h3>Potvrda akcije</h3>
+    <!-- Confirm Modal -->
+    <div *ngIf="showConfirmModal" class="z-overlay" (click)="closeConfirmModal()">
+      <div class="z-modal w-full max-w-sm" (click)="$event.stopPropagation()">
+        <div class="z-modal-header">
+          <h3 class="text-lg font-semibold">Potvrda akcije</h3>
         </div>
-
-        <div class="modal-body">
-          <p>
+        <div class="z-modal-body">
+          <p class="text-sm text-muted-foreground">
             Da li ste sigurni da želite
-            <strong>
+            <strong class="text-foreground">
               {{ selectedAccount?.status === 'ACTIVE' ? 'deaktivirati' : 'aktivirati' }}
             </strong>
             račun
-            <strong>{{ selectedAccount?.accountNumber }}</strong>?
+            <strong class="text-foreground font-mono">{{ selectedAccount?.accountNumber }}</strong>?
           </p>
         </div>
-
-        <div class="modal-actions">
-          <button type="button" class="modal-btn cancel-btn" (click)="closeConfirmModal()">
-            Otkaži
-          </button>
-          <button type="button" class="modal-btn confirm-btn" (click)="confirmToggleAccountStatus()">
-            Potvrdi
-          </button>
+        <div class="z-modal-footer">
+          <button type="button" class="z-btn z-btn-outline" (click)="closeConfirmModal()">Otkaži</button>
+          <button type="button" class="z-btn z-btn-primary" (click)="confirmToggleAccountStatus()">Potvrdi</button>
         </div>
       </div>
     </div>
-
   </div>
 </div>

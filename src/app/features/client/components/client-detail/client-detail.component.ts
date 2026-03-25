@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ClientDto, ClientService } from '../../services/client.service';
+import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 
 @Component({
   selector: 'app-client-detail',
   templateUrl: './client-detail.component.html',
   styleUrls: ['./client-detail.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, NavbarComponent]
 })
 export class ClientDetailComponent implements OnInit {
   clientForm: FormGroup;

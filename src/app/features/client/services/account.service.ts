@@ -48,8 +48,12 @@ export class AccountService {
     return this.http.patch<void>(`${this.baseUrl}/${id}/limit`, { accountLimit: dailyLimit });
   }
 
-  createAccount(payload: any): Observable<any> {
+  createFxAccount(payload: any): Observable<any> {
     return this.http.post(`${environment.apiUrl}/employee/accounts/fx`, payload);
+  }
+
+  createCheckingAccount(payload: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/employee/accounts/checking`, payload);
   }
 
   /**

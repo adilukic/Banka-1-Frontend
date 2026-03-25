@@ -1,75 +1,72 @@
-<div class="modal-overlay" (click)="onClose()">
-  <div class="modal-shell" (click)="$event.stopPropagation()">
-    <div class="modal-card">
-      <div class="modal-header">
+<div class="z-overlay" (click)="onClose()">
+  <div class="z-modal w-full max-w-md" (click)="$event.stopPropagation()">
+    <div class="z-modal-header">
+      <div>
+        <h2 class="text-lg font-semibold">Promena limita</h2>
+        <p class="text-xs text-muted-foreground mt-0.5">Postavite nove limite za {{ account.name }}</p>
+      </div>
+      <button type="button" class="text-muted-foreground hover:text-foreground text-xl leading-none" (click)="onClose()" aria-label="Close modal">
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <form [formGroup]="limitForm" (ngSubmit)="onSubmit()">
+      <div class="z-modal-body space-y-4">
         <div>
-          <h2 class="modal-title">Promena limita</h2>
-          <p class="modal-subtitle">Postavite nove limite za {{ account.name }}</p>
+          <label class="z-label" for="dailyLimit">Dnevni limit ({{ account.currency }})</label>
+          <input
+            id="dailyLimit"
+            type="number"
+            class="z-input"
+            formControlName="dailyLimit"
+            placeholder="Unesite dnevni limit"
+            [class.border-red-500]="limitForm.get('dailyLimit')?.invalid && limitForm.get('dailyLimit')?.touched"
+          />
+          <p class="z-error" *ngIf="limitForm.get('dailyLimit')?.hasError('required') && limitForm.get('dailyLimit')?.touched">
+            Dnevni limit je obavezan.
+          </p>
         </div>
-        <button type="button" class="close-button" (click)="onClose()" aria-label="Close modal">
-          <span>&times;</span>
+
+        <div>
+          <label class="z-label" for="monthlyLimit">Mesečni limit ({{ account.currency }})</label>
+          <input
+            id="monthlyLimit"
+            type="number"
+            class="z-input"
+            formControlName="monthlyLimit"
+            placeholder="Unesite mesečni limit"
+            [class.border-red-500]="(limitForm.get('monthlyLimit')?.invalid || limitForm.hasError('invalidLimits')) && limitForm.get('monthlyLimit')?.touched"
+          />
+          <p class="z-error" *ngIf="limitForm.get('monthlyLimit')?.hasError('required') && limitForm.get('monthlyLimit')?.touched">
+            Mesečni limit je obavezan.
+          </p>
+          <p class="z-error" *ngIf="limitForm.hasError('invalidLimits') && limitForm.get('monthlyLimit')?.touched && !limitForm.get('monthlyLimit')?.hasError('required')">
+            Mesečni limit ne sme biti manji od dnevnog.
+          </p>
+        </div>
+
+        <div>
+          <label class="z-label" for="verificationCode">Verifikacioni kod</label>
+          <input
+            id="verificationCode"
+            type="text"
+            class="z-input"
+            formControlName="verificationCode"
+            placeholder="Unesite 6-cifreni kod iz SMS-a/aplikacije"
+            [class.border-red-500]="limitForm.get('verificationCode')?.invalid && limitForm.get('verificationCode')?.touched"
+          />
+          <p class="z-error" *ngIf="limitForm.get('verificationCode')?.hasError('required') && limitForm.get('verificationCode')?.touched">
+            Verifikacioni kod je obavezan.
+          </p>
+        </div>
+      </div>
+
+      <div class="z-modal-footer">
+        <button type="button" class="z-btn z-btn-outline" (click)="onClose()" [disabled]="isSubmitting">Odustani</button>
+        <button type="submit" class="z-btn z-btn-primary" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Čuvanje...' : 'Sačuvaj izmene' }}
         </button>
       </div>
-
-      <div class="modal-body">
-        <form [formGroup]="limitForm" (ngSubmit)="onSubmit()" class="form-container">
-          
-          <div class="form-group">
-            <label class="form-label" for="dailyLimit">Dnevni limit ({{ account.currency }})</label>
-            <input 
-              id="dailyLimit" 
-              type="number" 
-              class="form-control" 
-              formControlName="dailyLimit" 
-              placeholder="Unesite dnevni limit"
-              [class.has-error]="limitForm.get('dailyLimit')?.invalid && limitForm.get('dailyLimit')?.touched"
-            />
-            <div class="error-text" *ngIf="limitForm.get('dailyLimit')?.hasError('required') && limitForm.get('dailyLimit')?.touched">
-              Dnevni limit je obavezan.
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="monthlyLimit">Mesečni limit ({{ account.currency }})</label>
-            <input 
-              id="monthlyLimit" 
-              type="number" 
-              class="form-control" 
-              formControlName="monthlyLimit" 
-              placeholder="Unesite mesečni limit"
-              [class.has-error]="(limitForm.get('monthlyLimit')?.invalid || limitForm.hasError('invalidLimits')) && limitForm.get('monthlyLimit')?.touched"
-            />
-            <div class="error-text" *ngIf="limitForm.get('monthlyLimit')?.hasError('required') && limitForm.get('monthlyLimit')?.touched">
-              Mesečni limit je obavezan.
-            </div>
-            <div class="error-text" *ngIf="limitForm.hasError('invalidLimits') && limitForm.get('monthlyLimit')?.touched && !limitForm.get('monthlyLimit')?.hasError('required')">
-              Mesečni limit ne sme biti manji od dnevnog.
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="verificationCode">Verifikacioni kod</label>
-            <input 
-              id="verificationCode" 
-              type="text" 
-              class="form-control" 
-              formControlName="verificationCode" 
-              placeholder="Unesite 6-cifreni kod iz SMS-a/aplikacije"
-              [class.has-error]="limitForm.get('verificationCode')?.invalid && limitForm.get('verificationCode')?.touched"
-            />
-            <div class="error-text" *ngIf="limitForm.get('verificationCode')?.hasError('required') && limitForm.get('verificationCode')?.touched">
-              Verifikacioni kod je obavezan.
-            </div>
-          </div>
-
-          <div class="modal-actions-form">
-            <button type="button" class="btn-cancel" (click)="onClose()" [disabled]="isSubmitting">Odustani</button>
-            <button type="submit" class="btn-submit" [disabled]="isSubmitting">
-              {{ isSubmitting ? 'Čuvanje...' : 'Sačuvaj izmene' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </form>
   </div>
 </div>

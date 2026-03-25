@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,6 +11,8 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
+  constructor(private authService: AuthService) {}
+
   navLinks = [
     { label: 'Računi',     route: '/accounts',            icon: 'account_balance' },
     { label: 'Klijenti',   route: '/clients',             icon: 'person' },
@@ -22,4 +25,8 @@ export class NavbarComponent {
     {label: 'Upravljanje računima',route: '/account-management',icon: 'account_balance'},
     { label: 'Primaoci plaćanja', route: '/payments/recipients', icon: 'people' },
   ];
+
+  logout(): void {
+    this.authService.logout();
+  }
 }

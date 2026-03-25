@@ -1,56 +1,68 @@
-$green-lite: #22c55e;
-$green:      #16a34a;
-$sidebar-bg: #1a1a1a;
+﻿:host { display: block; }
 
-.sidebar {
-  width: 220px;
-  background: $sidebar-bg;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  inset: 0 auto 0 0;
-  z-index: 200;
+/* ── Sidebar particles ────────────────────────────── */
+.sidebar-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
 
-  &__brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 22px 20px;
-    border-bottom: 1px solid #2a2a2a;
+.sp {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(134, 239, 172, 0.18);
+  filter: blur(2px);
+  box-shadow: 0 0 6px rgba(134, 239, 172, 0.12);
+  animation: drift-y linear infinite;
+}
 
-    &-icon { font-size: 22px; }
-    &-name { font-size: 17px; font-weight: 700; color: #ffffff; }
-  }
+.sp-1 { width: 14px; height: 14px; top: 8%;  left: 15%; animation-duration: 22s; }
+.sp-2 { width: 10px; height: 10px; top: 28%; left: 70%; animation-duration: 18s; animation-delay: -4s; }
+.sp-3 { width: 18px; height: 18px; top: 48%; left: 40%; animation-duration: 26s; animation-delay: -8s; }
+.sp-4 { width: 10px; height: 10px; top: 62%; left: 80%; animation-duration: 20s; animation-delay: -2s; }
+.sp-5 { width: 14px; height: 14px; top: 78%; left: 25%; animation-duration: 24s; animation-delay: -10s; }
+.sp-6 { width: 12px; height: 12px; top: 18%; left: 55%; animation-duration: 19s; animation-delay: -6s; }
+.sp-7 { width: 16px; height: 16px; top: 88%; left: 60%; animation-duration: 23s; animation-delay: -12s; }
+.sp-8 { width: 10px; height: 10px; top: 38%; left: 10%; animation-duration: 21s; animation-delay: -3s; }
 
-  &__nav {
-    display: flex;
-    flex-direction: column;
-    padding: 10px 0;
-    flex: 1;
-  }
+/* ── Header particles ─────────────────────────────── */
+.header-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
 
-  &__link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 20px;
-    color: #9ca3af;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    border-left: 3px solid transparent;
-    transition: all .15s;
+.hp {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(134, 239, 172, 0.16);
+  filter: blur(2px);
+  box-shadow: 0 0 6px rgba(134, 239, 172, 0.10);
+  animation: drift-x linear infinite;
+}
 
-    &:hover { color: #ffffff; background: #242424; }
+.hp-1 { width: 12px; height: 12px; top: 25%; left: 5%;  animation-duration: 28s; }
+.hp-2 { width: 10px; height: 10px; top: 60%; left: 20%; animation-duration: 22s; animation-delay: -5s; }
+.hp-3 { width: 16px; height: 16px; top: 35%; left: 40%; animation-duration: 32s; animation-delay: -10s; }
+.hp-4 { width: 10px; height: 10px; top: 70%; left: 60%; animation-duration: 25s; animation-delay: -3s; }
+.hp-5 { width: 14px; height: 14px; top: 20%; left: 75%; animation-duration: 30s; animation-delay: -14s; }
+.hp-6 { width: 10px; height: 10px; top: 55%; left: 90%; animation-duration: 26s; animation-delay: -8s; }
 
-    &--active {
-      color: $green-lite;
-      background: rgba($green, .15);
-      border-left-color: $green-lite;
-    }
+/* ── Keyframes ────────────────────────────────────── */
+@keyframes drift-y {
+  0%   { transform: translateY(0)   translateX(0);   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-80px) translateX(18px); opacity: 0; }
+}
 
-    &-icon  { font-size: 18px; flex-shrink: 0; }
-    &-label { flex: 1; }
-    &-arrow { font-size: 16px; opacity: .35; }
-  }
+@keyframes drift-x {
+  0%   { transform: translateX(0)   translateY(0);   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(60px) translateY(-12px); opacity: 0; }
 }

@@ -1,41 +1,26 @@
-<div class="modal-overlay" (click)="onClose()">
-  <div class="modal-shell" (click)="$event.stopPropagation()">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h4 class="modal-title">Verifikacija transakcije</h4>
-        <button type="button" class="close-button" (click)="onClose()">&times;</button>
-      </div>
-      
-      <div class="modal-body">
-        <p class="instruction-text">Verifikacioni kod je poslat na vaš uređaj (Mock: 1234).</p>
-        <div class="form-group">
-          <label for="code">Unesite kod</label>
-          <input 
-            type="text" 
-            id="code" 
-            class="form-control" 
-            [(ngModel)]="verificationCode" 
-            placeholder="0000"
-            maxlength="4"
-            (keyup.enter)="verificationCode.length === 4 && onConfirm()"
-          >
-        </div>
-        <div *ngIf="attempts > 0" class="attempts-badge">
-          Pokušaji: {{ attempts }} / {{ maxAttempts }}
-        </div>
-      </div>
+<div class="z-overlay" (click)="onClose()">
+  <div class="z-modal w-full max-w-sm" (click)="$event.stopPropagation()">
+    <div class="z-modal-header">
+      <h4 class="text-lg font-semibold">Verifikacija transakcije</h4>
+      <button type="button" class="text-muted-foreground hover:text-foreground text-xl leading-none" (click)="onClose()">&times;</button>
+    </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" (click)="onClose()">Odustani</button>
-        <button 
-          type="button" 
-          class="btn-confirm" 
-          (click)="onConfirm()" 
-          [disabled]="verificationCode.length < 4"
-        >
-          Potvrdi
-        </button>
+    <div class="z-modal-body space-y-4">
+      <p class="text-sm text-muted-foreground">Verifikacioni kod je poslat na vaš uređaj (Mock: 1234).</p>
+      <div>
+        <label for="code" class="z-label">Unesite kod</label>
+        <input type="text" id="code" class="z-input text-center tracking-[0.5em] text-lg font-semibold"
+               [(ngModel)]="verificationCode" placeholder="0000" maxlength="4"
+               (keyup.enter)="verificationCode.length === 4 && onConfirm()" />
       </div>
+      <div *ngIf="attempts > 0">
+        <span class="z-badge z-badge-yellow text-xs">Pokušaji: {{ attempts }} / {{ maxAttempts }}</span>
+      </div>
+    </div>
+
+    <div class="z-modal-footer">
+      <button type="button" class="z-btn-outline" (click)="onClose()">Odustani</button>
+      <button type="button" class="z-btn-primary" (click)="onConfirm()" [disabled]="verificationCode.length < 4">Potvrdi</button>
     </div>
   </div>
 </div>
