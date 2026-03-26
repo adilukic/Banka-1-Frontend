@@ -4,8 +4,13 @@ import { NgForm } from '@angular/forms';
 import { UserService } from '../../user.service';
 
 export type User = {
-  firstname: string;
-  lastname: string;
+  ime: string;
+  prezime: string;
+  datumRodjenja: number;
+  pol: string;
+  email: string;
+  brojTelefona: string;
+  adresa: string;
   jmbg: string;
 }
 
@@ -14,40 +19,14 @@ export type User = {
   templateUrl: './user-create.component.html',
   styleUrls: ['./user-create.component.scss'],
 })
-
-    // OVAKO IZGLEDA OBJEKAT KOJIM SE PRAVI NOVI KLIJENT
-
-
-    // @NotBlank(message = "Ime je obavezno")
-    // private String ime;
-
-    // @NotBlank(message = "Prezime je obavezno")
-    // private String prezime;
-
-    // @NotNull(message = "Datum rodjenja je obavezan")
-    // private Long datumRodjenja;
-
-    // @NotNull(message = "Pol je obavezan")
-    // private Pol pol;
-
-    // @NotBlank(message = "Email je obavezan")
-    // private String email;
-
-    // /** Broj telefona klijenta (opcioni, u internacionalnom formatu). */
-    // private String brojTelefona;
-
-    // /** Adresa stanovanja klijenta (opciona). */
-    // private String adresa;
-
-    // /** JMBG klijenta – jedinstveni identifikator, ne sme se menjati. */
-    // @NotBlank(message = "JMBG je obavezan")
-    // @Size(min = 13, max = 13, message = "JMBG mora imati tacno 13 cifara")
-    // private String jmbg;
-
-
 export class UserCreateComponent {
   public firstName = '';
   public lastName = '';
+  public dateOfBirth = '';
+  public gender = '';
+  public email = '';
+  public phone = '';
+  public address = '';
   public jmbg = '';
   public submitting = false;
 
@@ -63,8 +42,13 @@ export class UserCreateComponent {
       return;
     }
     const user: User = {
-      firstname: this.firstName,
-      lastname: this.lastName,
+      ime: this.firstName,
+      prezime: this.lastName,
+      datumRodjenja: new Date(this.dateOfBirth).getTime(),
+      pol: this.gender,
+      email: this.email,
+      brojTelefona: this.phone,
+      adresa: this.address,
       jmbg: this.jmbg
     };
 

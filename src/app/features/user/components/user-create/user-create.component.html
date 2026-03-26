@@ -1,7 +1,7 @@
 <app-navbar></app-navbar>
 
 <div class="page-layout">
-  <div class="page-content max-w-lg">
+  <div class="page-content max-w-2xl">
     <div class="z-card">
       <div class="mb-5">
         <h2 class="text-xl font-bold">Novi klijent</h2>
@@ -9,7 +9,8 @@
       </div>
 
       <form #userForm="ngForm" (ngSubmit)="submit(userForm)" class="space-y-4">
-        <div>
+        <div class="max-w-lg mx-auto space-y-4">
+          <div>
           <label class="z-label" for="firstName">Ime</label>
           <input
             id="firstName"
@@ -40,20 +41,102 @@
         </div>
 
         <div>
+          <label class="z-label" for="dateOfBirth">Datum rođenja</label>
+          <input
+            id="dateOfBirth"
+            type="date"
+            class="z-input"
+            [(ngModel)]="dateOfBirth"
+            name="dateOfBirth"
+            required
+          />
+          <p class="z-error" *ngIf="userForm.submitted && !dateOfBirth">
+            Datum rođenja je obavezan.
+          </p>
+        </div>
+
+        <div>
+          <label class="z-label" for="gender">Pol</label>
+          <select
+            id="gender"
+            class="z-select"
+            [(ngModel)]="gender"
+            name="gender"
+            required
+          >
+            <option value="" disabled>Izaberite pol</option>
+            <option value="M">Muški</option>
+            <option value="F">Ženski</option>
+          </select>
+          <p class="z-error" *ngIf="userForm.submitted && !gender">
+            Pol je obavezan.
+          </p>
+        </div>
+
+        <div>
+          <label class="z-label" for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="z-input"
+            [(ngModel)]="email"
+            name="email"
+            required
+            placeholder="Unesite email"
+          />
+          <p class="z-error" *ngIf="userForm.submitted && !email">
+            Email je obavezan.
+          </p>
+        </div>
+
+        <div>
+          <label class="z-label" for="phone">Broj telefona</label>
+          <input
+            id="phone"
+            type="tel"
+            class="z-input"
+            [(ngModel)]="phone"
+            name="phone"
+            placeholder="+381..."
+          />
+        </div>
+
+        <div>
+          <label class="z-label" for="address">Adresa</label>
+          <input
+            id="address"
+            class="z-input"
+            [(ngModel)]="address"
+            name="address"
+            placeholder="Unesite adresu"
+          />
+        </div>
+
+        <div>
           <label class="z-label" for="jmbg">JMBG</label>
           <input
             id="jmbg"
             class="z-input"
             [(ngModel)]="jmbg"
             name="jmbg"
-            placeholder="Unesite JMBG"
+            required
+            minlength="13"
+            maxlength="13"
+            placeholder="Unesite JMBG (13 cifara)"
           />
+          <p class="z-error" *ngIf="userForm.submitted && !jmbg">
+            JMBG je obavezan.
+          </p>
+          <p class="z-error" *ngIf="userForm.submitted && jmbg && jmbg.length !== 13">
+            JMBG mora imati tačno 13 cifara.
+          </p>
         </div>
 
         <div class="pt-2">
           <button type="submit" class="z-btn z-btn-primary z-btn-full" [disabled]="submitting">
             {{ submitting ? 'Kreiranje...' : 'Kreiraj' }}
           </button>
+        </div>
         </div>
       </form>
     </div>

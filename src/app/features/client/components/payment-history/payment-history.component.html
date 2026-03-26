@@ -4,7 +4,7 @@
   <div class="page-content">
     <h1 class="text-2xl font-bold text-foreground mb-6">PREGLED PLAĆANJA</h1>
 
-    <div class="z-card overflow-hidden">
+    <div class="z-card">
       <!-- Tabs -->
       <div class="flex border-b border-border">
         <button class="px-5 py-3 text-sm font-medium transition-colors border-b-2"
@@ -37,11 +37,11 @@
             </button>
 
             <!-- Backdrop -->
-            <div class="z-overlay" *ngIf="isFilterOpen" (click)="closeFilterPanel()"></div>
+            <div class="fixed inset-0 z-40" *ngIf="isFilterOpen" (click)="closeFilterPanel()"></div>
 
             <!-- Filter panel -->
             <div *ngIf="isFilterOpen"
-                 class="absolute right-0 top-full mt-2 w-80 z-modal bg-card rounded-xl border border-border shadow-lg p-5 space-y-4">
+                 class="absolute right-0 top-full mt-2 w-80 z-50 bg-card rounded-xl border border-border shadow-lg p-5 space-y-4">
               <div class="flex justify-between items-center">
                 <h3 class="text-sm font-semibold">Filteri</h3>
                 <button type="button" class="text-muted-foreground hover:text-foreground" (click)="closeFilterPanel()">
