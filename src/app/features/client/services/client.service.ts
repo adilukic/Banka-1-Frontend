@@ -115,11 +115,10 @@ export class ClientService {
 
   getAllRecipients(accountNumber: string, page = 0, size = 10): Observable<PaymentRecipient[]> {
     const params = new HttpParams()
-      .set('accountNumber', accountNumber)
       .set('page', page.toString())
       .set('size', size.toString());
 
-    return this.http.get<any>(`${environment.apiUrl}/transactions/api/all-payments`, { params }).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/transfers/accounts/${accountNumber}`, { params }).pipe(
       map(res => {
         if (!res.content) return res;
         return res.content;
@@ -127,6 +126,18 @@ export class ClientService {
     );
   }
 
+
+
+  
+  // FIX OVO, ZOVE SE U PRIMAOCI PLACANJA -> DODAJ, komponenta: payment-recipients.component.ts
+  //   private String fromAccountNumber;
+  //   private String toAccountNumber;
+  //   private BigDecimal amount;
+  //   private String recipientName;
+  //   private String paymentCode;
+  //   private String referenceNumber;
+  //   private String paymentPurpose;
+  //   private Long verificationSessionId;
   createRecipient(name: string, accountNumber: string): Observable<PaymentRecipient> {
     return this.http.post<PaymentRecipient>(`${environment.apiUrl}/transactions/payments`, { name, accountNumber });
   }

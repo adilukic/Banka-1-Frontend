@@ -35,68 +35,6 @@ export class HomeComponent implements OnInit {
     this.loadAccounts();
   }
 
-  // ── Učitavanje računa ────────────────────────
-  /*test
-  loadAccounts(): void {
-    this.loading = true;
-    this.error = false;
-
-    // TODO: zameniti sa pravim API pozivom kad bek bude spreman:
-    // this.accountService.getMyAccounts().subscribe({...})
-    setTimeout(() => {
-      this.accounts = [
-        {
-          id: 1,
-          name: 'Tekući račun',
-          accountNumber: '265000000000123456',
-          balance: 180000,
-          availableBalance: 178000,
-          reservedFunds: 2000,
-          currency: 'RSD',
-          status: 'ACTIVE',
-          subtype: 'STANDARD',
-          ownerId: 1,
-          ownerName: 'Petar Petrović',
-          employeeId: 2,
-          maintenanceFee: 255,
-          dailyLimit: 250000,
-          monthlyLimit: 1000000,
-          dailySpending: 150000,
-          monthlySpending: 600000,
-          createdAt: '2024-01-01',
-          expiryDate: '2027-01-01'
-        },
-        {
-          id: 2,
-          name: 'Devizni račun',
-          accountNumber: '265000000000654321',
-          balance: 5000,
-          availableBalance: 4850,
-          reservedFunds: 150,
-          currency: 'EUR',
-          status: 'ACTIVE',
-          subtype: 'FOREIGN_PERSONAL',
-          ownerId: 1,
-          ownerName: 'Petar Petrović',
-          employeeId: 2,
-          maintenanceFee: 0,
-          dailyLimit: 10000,
-          monthlyLimit: 50000,
-          dailySpending: 200,
-          monthlySpending: 1500,
-          createdAt: '2024-03-01',
-          expiryDate: '2027-03-01'
-        }
-      ];
-
-      if (this.accounts.length > 0) {
-        this.selectAccount(this.accounts[0]);
-      }
-
-      this.loading = false;
-    }, 600);
-  }*/
-
   loadAccounts(): void {
     this.loading = true;
     this.error = false;

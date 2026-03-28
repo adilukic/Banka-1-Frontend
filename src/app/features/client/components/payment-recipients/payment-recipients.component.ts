@@ -150,8 +150,6 @@ export class PaymentRecipientsComponent implements OnInit {
           this.formLoading = false;
         },
         error: () => {
-          // TODO: ukloniti mock kada backend bude spreman
-          this.recipients.push({ id: Date.now(), name, accountNumber });
           this.applyFilter();
           this.closeForm();
           this.formLoading = false;
@@ -167,9 +165,6 @@ export class PaymentRecipientsComponent implements OnInit {
           this.formLoading = false;
         },
         error: () => {
-          // TODO: ukloniti mock kada backend bude spreman
-          const index = this.recipients.findIndex(r => r.id === this.editingId);
-          if (index !== -1) this.recipients[index] = { id: this.editingId!, name, accountNumber };
           this.applyFilter();
           this.closeForm();
           this.formLoading = false;

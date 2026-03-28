@@ -159,7 +159,13 @@ export class PaymentHistoryComponent implements OnInit, OnDestroy {
   }
 
   public formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
+    if (!dateStr) {
+      return 'N/A';
+    }
+    
+    // Parse date string in YYYY-MM-DD format to avoid timezone issues
+    const [year, month, day] = dateStr.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
 
     return date.toLocaleDateString('sr-RS', {
       day: '2-digit',

@@ -107,7 +107,7 @@
             <tr *ngFor="let payment of payments; trackBy: trackByPaymentId"
                 class="cursor-pointer hover:bg-muted/50" (click)="openTransactionDetails(payment)">
               <td class="text-muted-foreground">{{ formatDate(payment.date) }}</td>
-              <td class="font-medium">{{ payment.payerName }}</td>
+              <td class="font-medium">{{ payment.recipientName }}</td>
               <td>{{ payment.currency }}</td>
               <td class="font-semibold">{{ formatAmount(payment.amount) }}</td>
               <td>

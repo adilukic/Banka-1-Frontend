@@ -15,7 +15,7 @@ export class AccountService {
 
   getMyAccounts(): Observable<Account[]> {
     const page = 0;
-    const size = 10;
+    const size = 50;
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
@@ -144,7 +144,7 @@ export class AccountService {
     size = 5,
   ): Observable<Transaction[]> {
     return this.http
-      .get<TransactionPage>(`${environment.apiUrl}/transactions/accounts/${accountNumber}`, {
+      .get<TransactionPage>(`${environment.apiUrl}/transactions/employee/accounts/${accountNumber}`, {
         params: { page: page.toString(), size: size.toString() },
       })
       .pipe(map((res) => res.content));
