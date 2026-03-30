@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
-import {Router} from '@angular/router';
-import {HttpClient} from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
-import {tap, catchError} from 'rxjs/operators';
-import {environment} from '../../../environments/environment';
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 type LoginResponse = {
   jwt: string;
@@ -21,22 +21,27 @@ type RefreshResponse = {
   permissions: string[];
 };
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly TOKEN_KEY = 'authToken';
   private readonly USER_KEY = 'loggedUser';
 
-  constructor(private router: Router, private http: HttpClient) {
-  }
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+  ) {}
 
   /**
    * Prijavljuje zaposlenog sa email-om i lozinkom.
    */
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/employees/auth/login`, {email, password})
+      .post<LoginResponse>(`${environment.apiUrl}/employees/auth/login`, {
+        email,
+        password,
+      })
       .pipe(
-        tap(res => {
+        tap((res) => {
           localStorage.setItem(this.TOKEN_KEY, res.jwt);
           localStorage.setItem('refreshToken', res.refreshToken);
           localStorage.setItem(
@@ -44,21 +49,27 @@ export class AuthService {
             JSON.stringify({
               email,
               role: res.role,
-              permissions: res.permissions
-            })
+              permissions: res.permissions,
+            }),
           );
-        })
+        }),
       );
   }
 
   /**
    * Prijavljuje klijenta sa email-om i lozinkom.
    */
-  loginClient(email: string, password: string): Observable<ClientLoginResponse> {
+  loginClient(
+    email: string,
+    password: string,
+  ): Observable<ClientLoginResponse> {
     return this.http
-      .post<ClientLoginResponse>(`${environment.apiUrl}/clients/auth/login`, {email, password})
+      .post<ClientLoginResponse>(`${environment.apiUrl}/clients/auth/login`, {
+        email,
+        password,
+      })
       .pipe(
-        tap(res => {
+        tap((res) => {
           localStorage.setItem(this.TOKEN_KEY, res.token);
 
           // Izvuci ulogu iz JWT tokena
@@ -73,10 +84,10 @@ export class AuthService {
             JSON.stringify({
               email,
               role,
-              permissions: ['BANKING_BASIC']
-            })
+              permissions: ['BANKING_BASIC'],
+            }),
           );
-        })
+        }),
       );
   }
 
@@ -113,9 +124,10 @@ export class AuthService {
    * @returns Observable with text response message
    */
   public forgotPassword(email: string): Observable<string> {
-    return this.http.post<string>(`${environment.apiUrl}/employees/auth/forgot-password`,
+    return this.http.post<string>(
+      `${environment.apiUrl}/employees/auth/forgot-password`,
       { email },
-      { responseType: 'text' as 'json' }
+      { responseType: 'text' as 'json' },
     );
   }
 
@@ -123,12 +135,14 @@ export class AuthService {
    * Validates reset password confirmation token and returns confirmation id.
    * @param confirmationToken Token from reset password email link
    */
-  public checkResetPasswordToken(confirmationToken: string): Observable<number> {
+  public checkResetPasswordToken(
+    confirmationToken: string,
+  ): Observable<number> {
     return this.http.get<number>(
       `${environment.apiUrl}/employees/auth/checkResetPassword`,
       {
-        params: { confirmationToken }
-      }
+        params: { confirmationToken },
+      },
     );
   }
 
@@ -141,14 +155,16 @@ export class AuthService {
   public resetPassword(
     id: number,
     confirmationToken: string,
-    password: string
+    password: string,
   ): Observable<string> {
-    return this.http.post<string>(`${environment.apiUrl}/employees/auth/resetPassword`, {
-      id,
-      confirmationToken,
-      password
-    },
-    { responseType: 'text' as 'json' }
+    return this.http.post<string>(
+      `${environment.apiUrl}/employees/auth/resetPassword`,
+      {
+        id,
+        confirmationToken,
+        password,
+      },
+      { responseType: 'text' as 'json' },
     );
   }
 
@@ -160,8 +176,8 @@ export class AuthService {
     return this.http.get<number>(
       `${environment.apiUrl}/employees/auth/checkActivate`,
       {
-        params: { confirmationToken }
-      }
+        params: { confirmationToken },
+      },
     );
   }
 
@@ -174,14 +190,51 @@ export class AuthService {
   public activateAccount(
     id: number,
     confirmationToken: string,
-    password: string
+    password: string,
   ): Observable<string> {
-    return this.http.post<string>(`${environment.apiUrl}/employees/auth/activate`, {
-      id,
-      confirmationToken,
-      password
-    },
-    { responseType: 'text' as 'json' }
+    return this.http.post<string>(
+      `${environment.apiUrl}/employees/auth/activate`,
+      {
+        id,
+        confirmationToken,
+        password,
+      },
+      { responseType: 'text' as 'json' },
+    );
+  }
+
+  /**
+   * Validates client activate confirmation token and returns confirmation id.
+   * @param confirmationToken Token from activation email link
+   */
+  public checkClientActivateToken(confirmationToken: string): Observable<number> {
+    return this.http.get<number>(
+      `${environment.apiUrl}/clients/auth/checkActivate`,
+      {
+        params: { confirmationToken },
+      },
+    );
+  }
+
+  /**
+   * Sends client activate account request.
+   * @param id Confirmation id returned by checkClientActivate endpoint
+   * @param confirmationToken Token from URL
+   * @param password New password
+   */
+  public activateClientAccount(
+    id: number,
+    confirmationToken: string,
+    password: string,
+  ): Observable<string> {
+    return this.http.post<string>(
+      `${environment.apiUrl}/clients/auth/activate`,
+      {
+        id,
+        confirmationToken,
+        password,
+      },
+      { responseType: 'text' as 'json' },
     );
   }
 
@@ -195,9 +248,11 @@ export class AuthService {
     const refreshToken = localStorage.getItem('refreshToken');
 
     return this.http
-      .post<RefreshResponse>(`${environment.apiUrl}/auth/refresh`, { refreshToken })
+      .post<RefreshResponse>(`${environment.apiUrl}/auth/refresh`, {
+        refreshToken,
+      })
       .pipe(
-        tap(res => {
+        tap((res) => {
           localStorage.setItem(this.TOKEN_KEY, res.jwt);
           localStorage.setItem('refreshToken', res.refreshToken);
 
@@ -207,14 +262,14 @@ export class AuthService {
             JSON.stringify({
               email: user?.email ?? '',
               role: res.role,
-              permissions: res.permissions
-            })
+              permissions: res.permissions,
+            }),
           );
         }),
-        catchError(err => {
+        catchError((err) => {
           this.logout();
           return throwError(() => err);
-        })
+        }),
       );
   }
 
@@ -263,7 +318,9 @@ export class AuthService {
         return null;
       }
 
-      const normalizedPayload = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const normalizedPayload = payloadPart
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
       const decodedPayload = atob(normalizedPayload);
       const payload = JSON.parse(decodedPayload) as { id?: number | string };
 

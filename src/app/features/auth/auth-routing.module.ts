@@ -28,7 +28,13 @@ const routes: Routes = [
   },
   {
     path: 'auth/activate-account',
-    component: ActivateAccountComponent
+    component: ActivateAccountComponent,
+    data: { userType: 'employee' }
+  },
+  {
+    path: 'auth/activate-client',
+    component: ActivateAccountComponent,
+    data: { userType: 'client' }
   }
 ];
 
