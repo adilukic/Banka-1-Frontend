@@ -61,7 +61,7 @@ export class EmployeeEditComponent implements OnChanges {
   }
 
   onOverlayClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
+    if ((event.target as HTMLElement).classList.contains('z-overlay') || (event.target as HTMLElement).classList.contains('modal-overlay')) {
       this.cancel.emit();
     }
   }

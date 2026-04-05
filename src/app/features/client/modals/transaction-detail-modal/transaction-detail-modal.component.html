@@ -1,0 +1,71 @@
+<div class="z-overlay" (click)="closeModal()">
+  <div class="z-modal w-full max-w-lg" (click)="$event.stopPropagation()" *ngIf="payment">
+    <div class="z-modal-header">
+      <div>
+        <h2 class="text-lg font-semibold">Detalji transakcije</h2>
+        <p class="text-xs text-muted-foreground mt-0.5">{{ payment.orderNumber }}</p>
+      </div>
+      <button type="button" class="text-muted-foreground hover:text-foreground text-xl leading-none" (click)="closeModal()" aria-label="Close modal">
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <div class="z-modal-body">
+      <div class="divide-y divide-border rounded-lg border border-border overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Broj naloga</span>
+          <span class="text-sm font-medium">{{ payment.orderNumber }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Primalac</span>
+          <span class="text-sm font-medium">{{ payment.recipientName }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Sa računa</span>
+          <span class="text-sm font-mono">{{ payment.payerAccountNumber }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Na račun</span>
+          <span class="text-sm font-mono">{{ payment.recipientAccountNumber }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Početni iznos</span>
+          <span class="text-sm font-medium">{{ formatAmount(payment.initialAmount) }} {{ payment.fromCurrency ?? payment.currency }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Krajnji iznos</span>
+          <span class="text-sm font-medium">{{ formatAmount(payment.finalAmount) }} {{ payment.finalCurrency ?? payment.currency }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Provizija</span>
+          <span class="text-sm font-medium">{{ formatAmount(payment.fee) }} {{ payment.fromCurrency ?? payment.currency }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Šifra plaćanja</span>
+          <span class="text-sm font-medium">{{ payment.paymentCode || '-' }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Poziv na broj</span>
+          <span class="text-sm font-medium">{{ payment.referenceNumber || '-' }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Svrha plaćanja</span>
+          <span class="text-sm font-medium">{{ payment.purpose || '-' }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-green-50">
+          <span class="text-sm text-muted-foreground">Vreme transakcije</span>
+          <span class="text-sm font-semibold text-foreground">{{ formatTimestamp(payment.timestamp) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="z-modal-footer">
+      <button type="button" class="z-btn-outline flex items-center gap-2" (click)="printReceipt()">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Štampaj potvrdu
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,134 +1,138 @@
-<div class="modal-overlay" (click)="closeModal()">
-  <div class="modal-shell" (click)="$event.stopPropagation()" *ngIf="account">
-    <div class="bg-decoration">
-      <div class="bg-circle bg-circle-1"></div>
-      <div class="bg-circle bg-circle-2"></div>
-      <div class="bg-circle bg-circle-3"></div>
+<div class="z-overlay" (click)="closeModal()">
+  <div class="z-modal w-full max-w-lg" (click)="$event.stopPropagation()" *ngIf="account">
+    <div class="z-modal-header">
+      <div>
+        <h2 class="text-lg font-semibold">Detalji računa</h2>
+        <p class="text-xs text-muted-foreground mt-0.5">{{ getModalSubtitle() }}</p>
+      </div>
+      <button type="button" class="text-muted-foreground hover:text-foreground text-xl leading-none" (click)="closeModal()" aria-label="Close modal">
+        <span>&times;</span>
+      </button>
     </div>
 
-    <div class="modal-card">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title">Account details</h2>
-          <p class="modal-subtitle">{{ getModalSubtitle() }}</p>
+    <div class="z-modal-body space-y-5">
+      <div class="divide-y divide-border rounded-lg border border-border overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Naziv računa</span>
+          <span class="text-sm font-medium">{{ account.name }}</span>
         </div>
-
-        <button
-          type="button"
-          class="close-button"
-          (click)="closeModal()"
-          aria-label="Close modal"
-        >
-          <span>&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="details-grid">
-          <div class="detail-row">
-            <span class="detail-label">Account name</span>
-            <span class="detail-value">{{ account.name }}</span>
-          </div>
-
-          <div class="detail-row">
-            <span class="detail-label">Account number</span>
-            <span class="detail-value">{{ account.accountNumber }}</span>
-          </div>
-
-          <div class="detail-row">
-            <span class="detail-label">Owner</span>
-            <span class="detail-value">{{ account.ownerName }}</span>
-          </div>
-
-          <div class="detail-row">
-            <span class="detail-label">Type</span>
-            <span class="detail-value">{{ getAccountTypeLabel() }}</span>
-          </div>
-
-          <div class="detail-row">
-            <span class="detail-label">Available resources</span>
-            <span class="detail-value">
-              {{ formatAmount(account.availableBalance) }} {{ account.currency }}
-            </span>
-          </div>
-
-          <div class="detail-row">
-            <span class="detail-label">Reserved resources</span>
-            <span class="detail-value">
-              {{ formatAmount(account.reservedFunds) }} {{ account.currency }}
-            </span>
-          </div>
-
-          <div class="detail-row detail-row-balance">
-            <span class="detail-label">Balance</span>
-            <span class="detail-value detail-value-strong">
-              {{ formatAmount(account.balance) }} {{ account.currency }}
-            </span>
-          </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Broj računa</span>
+          <span class="text-sm font-mono">{{ account.accountNumber }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Vlasnik</span>
+          <span class="text-sm font-medium">{{ account.ownerName }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Tip</span>
+          <span class="text-sm font-medium">{{ getAccountTypeLabel() }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Raspoloživa sredstva</span>
+          <span class="text-sm font-medium">{{ formatAmount(account.availableBalance) }} {{ account.currency }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+          <span class="text-sm text-muted-foreground">Rezervisana sredstva</span>
+          <span class="text-sm font-medium">{{ formatAmount(account.reservedFunds) }} {{ account.currency }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-2.5 bg-green-50">
+          <span class="text-sm font-medium text-foreground">Stanje</span>
+          <span class="text-sm font-bold text-green-700">{{ formatAmount(account.balance) }} {{ account.currency }}</span>
         </div>
       </div>
 
-      <div class="company-section" *ngIf="isBusinessAccount()">
-        <p class="section-title">Company details</p>
-
-        <div class="details-grid">
-          <div class="detail-row" *ngIf="account.name || account.companyName">
-            <span class="detail-label">Company name</span>
-            <span class="detail-value">{{ account.company?.name || account.companyName }}</span>
+      <!-- Limits section -->
+      <div class="space-y-2">
+        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Limiti i potrošnja</p>
+        <div class="divide-y divide-border rounded-lg border border-border overflow-hidden">
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+            <span class="text-sm text-muted-foreground">Dnevni limit</span>
+            <span class="text-sm font-medium">{{ formatAmount(account.dailyLimit) }} {{ account.currency }}</span>
           </div>
-
-          <div class="detail-row" *ngIf="account.company?.registrationNumber">
-            <span class="detail-label">Registration number</span>
-            <span class="detail-value">{{ account.company?.registrationNumber }}</span>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+            <span class="text-sm text-muted-foreground">Dnevna potrošnja</span>
+            <span class="text-sm font-medium">{{ formatAmount(account.dailySpending) }} {{ account.currency }}</span>
           </div>
-
-          <div class="detail-row" *ngIf="account.company?.taxId">
-            <span class="detail-label">Tax ID</span>
-            <span class="detail-value">{{ account.company?.taxId }}</span>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+            <span class="text-sm text-muted-foreground">Mesečni limit</span>
+            <span class="text-sm font-medium">{{ formatAmount(account.monthlyLimit) }} {{ account.currency }}</span>
           </div>
-
-          <div class="detail-row" *ngIf="account.company?.activityCode">
-            <span class="detail-label">Activity code</span>
-            <span class="detail-value">{{ account.company?.activityCode }}</span>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+            <span class="text-sm text-muted-foreground">Mesečna potrošnja</span>
+            <span class="text-sm font-medium">{{ formatAmount(account.monthlySpending) }} {{ account.currency }}</span>
           </div>
-
-          <div class="detail-row" *ngIf="account.company?.address">
-            <span class="detail-label">Address</span>
-            <span class="detail-value">{{ account.company?.address }}</span>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+            <span class="text-sm text-muted-foreground">Naknada za održavanje</span>
+            <span class="text-sm font-medium">{{ formatAmount(account.maintenanceFee) }} {{ account.currency }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card">
+            <span class="text-sm text-muted-foreground">Datum kreiranja</span>
+            <span class="text-sm font-medium">{{ account.createdAt | date:'dd.MM.yyyy' }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card" *ngIf="account.expiryDate">
+            <span class="text-sm text-muted-foreground">Datum isteka</span>
+            <span class="text-sm font-medium">{{ account.expiryDate | date:'dd.MM.yyyy' }}</span>
           </div>
         </div>
       </div>
 
-      <div class="modal-actions-section">
-        <p class="options-label">Options</p>
+      <!-- Company section -->
+      <div *ngIf="isBusinessAccount()" class="space-y-2">
+        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Podaci o firmi</p>
+        <div class="divide-y divide-border rounded-lg border border-border overflow-hidden">
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card" *ngIf="account.name || account.companyName">
+            <span class="text-sm text-muted-foreground">Naziv firme</span>
+            <span class="text-sm font-medium">{{ account.company?.name || account.companyName }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card" *ngIf="account.company?.registrationNumber">
+            <span class="text-sm text-muted-foreground">Matični broj</span>
+            <span class="text-sm font-medium">{{ account.company?.registrationNumber }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card" *ngIf="account.company?.taxId">
+            <span class="text-sm text-muted-foreground">PIB</span>
+            <span class="text-sm font-medium">{{ account.company?.taxId }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card" *ngIf="account.company?.activityCode">
+            <span class="text-sm text-muted-foreground">Šifra delatnosti</span>
+            <span class="text-sm font-medium">{{ account.company?.activityCode }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-2.5 bg-card" *ngIf="account.company?.address">
+            <span class="text-sm text-muted-foreground">Adresa</span>
+            <span class="text-sm font-medium">{{ account.company?.address }}</span>
+          </div>
+        </div>
+      </div>
 
-        <div class="options-list">
-          <button type="button" class="option-item" (click)="onChangeAccountName()">
-            <span class="option-text">Change account name</span>
-            <span class="option-arrow">&gt;</span>
+      <!-- Options -->
+      <div class="space-y-2">
+        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Opcije</p>
+        <div class="space-y-1">
+          <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm" (click)="onChangeAccountName()">
+            <span>Promeni naziv računa</span>
+            <svg class="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
-
-          <button type="button" class="option-item" (click)="onNewPayment()">
-            <span class="option-text">New payment</span>
-            <span class="option-arrow">&gt;</span>
+          <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm" (click)="onNewPayment()">
+            <span>Novo plaćanje</span>
+            <svg class="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
-
-          <button type="button" class="option-item option-item-limit" (click)="onChangeLimit()">
-            <span class="option-text">Change limit</span>
-            <span class="option-arrow">&gt;</span>
+          <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm" (click)="onChangeLimit()">
+            <span>Promeni limit</span>
+            <svg class="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <app-rename-account-modal
   *ngIf="showRenameModal && account"
   [account]="account"
   [allAccounts]="allAccounts"
   (closed)="showRenameModal = false"
-  (updated)="onNameUpdated($event)"
-></app-rename-account-modal>
+  (updated)="onNameUpdated($event)">
+</app-rename-account-modal>
 <app-change-limit-modal
   *ngIf="isChangeLimitModalOpen && account"
   [account]="account"

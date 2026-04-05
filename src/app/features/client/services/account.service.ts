@@ -1,33 +1,208 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, delay } from 'rxjs';
-import { map } from 'rxjs/operators'; // Dodato za paginaciju kada pređeš na backend
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Account, ChangeLimitDto } from '../models/account.model';
+import { Transaction } from '../models/transaction.model';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
-  private readonly baseUrl = `${environment.apiUrl}/client/accounts`;
+  private readonly baseUrl = `${environment.apiUrl}/accounts/client/accounts`;
+  private readonly api = `${environment.apiUrl}/accounts`;
 
   constructor(private http: HttpClient) {}
 
   getMyAccounts(): Observable<Account[]> {
-     return this.http.get<any>(this.baseUrl).pipe(map(res => res.content));
+    const page = 0;
+    const size = 50;
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<any>(this.baseUrl, { params }).pipe(
+      map((res) => {
+        if (!res.content) return [];
+        const mapped = res.content.map((item: any) =>
+          this.mapToAccountFromClient(item),
+        );
+        console.log(
+          'Loaded accounts with currencies:',
+          mapped.map((a: Account) => ({
+            name: a.name,
+            accountNumber: a.accountNumber,
+            currency: a.currency,
+          })),
+        );
+        return mapped;
+      }),
+    );
   }
 
-  getAccountById(id: number): Observable<Account> {
-     return this.http.get<Account>(`${this.baseUrl}/${id}`);
+  /**
+   * Employee endpoint for all accounts in the system with pagination support.
+   */
+  getAllAccountsPaginated(
+    page: number = 0,
+    size: number = 10,
+  ): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<any>(
+      `${environment.apiUrl}/accounts/employee/accounts`,
+      { params },
+    );
   }
 
-  renameAccount(id: number, name: string): Observable<void> {
-     return this.http.patch<void>(`${this.baseUrl}/${id}/name`, { accountName: name });
+  private mapToAccountFromClient(item: any): Account {
+    const subtype = this.mapToSubtypeFromClient(
+      item.subtype,
+      item.accountType,
+      item.accountCategory,
+    );
+
+    const currency = item.currency || item.valuta || 'RSD';
+
+    return {
+      id: this.hashAccountNumber(item.brojRacuna),
+      name: item.nazivRacuna || '',
+      accountNumber: (item.brojRacuna || item.accountNumber || '').trim(),
+      balance: item.stanjeRacuna || 0,
+      availableBalance: item.raspolozivoStanje || 0,
+      reservedFunds: item.rezervisanaSredstva || 0,
+      currency: currency,
+      status: item.status || 'ACTIVE',
+      subtype: subtype,
+      ownerId: item.vlasnik || 0,
+      ownerName: '',
+      employeeId: 0,
+      maintenanceFee: 0,
+      dailyLimit: item.dailyLimit || 0,
+      monthlyLimit: item.monthlyLimit || 0,
+      dailySpending: item.dailySpending || 0,
+      monthlySpending: item.monthlySpending || 0,
+      createdAt: item.creationDate || new Date().toISOString(),
+      expiryDate: item.expirationDate || '',
+    } as Account;
   }
 
-  changeLimit(id: number, dailyLimit: number, monthlyLimit: number): Observable<void> {
-     return this.http.patch<void>(`${this.baseUrl}/${id}/limit`, { accountLimit: dailyLimit });
+  private mapToSubtypeFromClient(
+    subtype: string,
+    accountType: string,
+    accountCategory: string,
+  ): any {
+    const subtypeMap: Record<string, string> = {
+      STANDARDNI: 'STANDARD',
+      STEDNI: 'SAVINGS',
+      PENZIONERSKI: 'PENSION',
+      ZA_MLADE: 'YOUTH',
+      ZA_STUDENTE: 'STUDENT',
+      ZA_NEZAPOSLENE: 'UNEMPLOYED',
+      DOO: 'DOO',
+      AD: 'AD',
+      FONDACIJA: 'FOUNDATION',
+    };
+
+    if (subtype && subtypeMap[subtype]) {
+      return subtypeMap[subtype];
+    }
+
+    // Fallback for FX accounts which don't have a subtype
+    if (accountCategory === 'FX') {
+      return accountType === 'BUSINESS' ? 'FOREIGN_BUSINESS' : 'FOREIGN_PERSONAL';
+    }
+
+    return 'STANDARD';
   }
 
-  createAccount(payload: any): Observable<any> {
-    return this.http.post(this.baseUrl, payload);
+  getAccountByNumber(accountNumber: string): Observable<Account> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/accounts/client/api/accounts/${accountNumber}`
+    ).pipe(map(item => this.mapToAccountFromClient(item)));
+  }
+
+  getTransactions(
+    accountNumber: string,
+    page = 0,
+    size = 5,
+  ): Observable<Transaction[]> {
+    return this.http
+      .get<any>(
+        `${environment.apiUrl}/transactions/accounts/${accountNumber}`,
+        {
+          params: { page: page.toString(), size: size.toString() },
+        },
+      )
+      .pipe(map((res) => (res.content ?? []).map((item: any): Transaction => ({
+        id: 0,
+        fromAccountId: 0,
+        toAccountNumber: item.toAccountNumber ?? '',
+        recipientName: item.recipientName ?? '',
+        amount: item.finalAmount ?? item.amount ?? 0,
+        currency: item.fromCurrency ?? item.currency ?? 'RSD',
+        status: item.status ?? 'COMPLETED',
+        description: item.paymentPurpose ?? item.description ?? '',
+        createdAt: item.createdAt ?? '',
+        type: item.type ?? 'PAYMENT',
+      }))));
+  }
+
+  renameAccount(accountNumber: string, name: string): Observable<void> {
+    return this.http.put<void>(
+      `${this.api}/client/api/accounts/${accountNumber}/name`,
+      { accountName: name },
+      { responseType: 'text' as 'json' },
+    );
+  }
+
+  changeLimit(
+    accountNumber: string,
+    dailyLimit: number,
+    monthlyLimit: number,
+    verificationSessionId: number,
+  ): Observable<void> {
+    return this.http.put<void>(
+      `${this.api}/client/api/accounts/${accountNumber}/limits`,
+      { dailyLimit, monthlyLimit, verificationSessionId } as ChangeLimitDto,
+      { responseType: 'text' as 'json' },
+    );
+  }
+
+  createFxAccount(payload: any): Observable<any> {
+    return this.http.post(`${this.api}/employee/accounts/fx`, payload);
+  }
+
+  createCheckingAccount(payload: any): Observable<any> {
+    return this.http.post(`${this.api}/employee/accounts/checking`, payload);
+  }
+
+  /**
+   * Activate/deactivate account by account ID.
+   * Backend endpoint is expected to accept status update.
+   */
+  updateAccountStatus(
+    accountNumber: string,
+    status: 'ACTIVE' | 'INACTIVE',
+  ): Observable<any> {
+    return this.http.put<any>(
+      `${this.api}/employee/accounts/${accountNumber}/status`,
+      { status },
+      { responseType: 'text' as 'json' }
+    );
+  }
+
+  /**
+   * Generate unique numeric ID from account number
+   */
+  private hashAccountNumber(accountNumber: string): number {
+    let hash = 0;
+    for (let i = 0; i < accountNumber.length; i++) {
+      const char = accountNumber.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
   }
 }

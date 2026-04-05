@@ -1,54 +1,29 @@
-<div class="layout">
-  <!-- Reusable navigacioni meni -->
-  <app-navbar></app-navbar>
+<app-navbar></app-navbar>
 
-  <div class="main">
+<div class="page-layout">
+  <div class="page-content">
+    <h1 class="text-xl font-bold text-foreground mb-5">Početna</h1>
 
-    <!-- Zaglavlje -->
-    <header class="topbar">
-      <div class="topbar__search">
-        <span class="material-icons">search</span>
-        <input type="text" placeholder="Transakcije, računi, kartice..." />
-      </div>
+      <div class="grid grid-cols-[1fr_1fr_300px] gap-4">
 
-      <div class="topbar__right">
-        <button class="topbar__icon-btn" title="Obaveštenja">
-          <span class="material-icons">notifications</span>
-        </button>
-        <span class="topbar__greeting">Dobro došli</span>
-        <button class="topbar__icon-btn" routerLink="/profile" title="Profil">
-          <span class="material-icons">account_circle</span>
-        </button>
-        <button class="topbar__logout" (click)="logout()">
-          <span class="material-icons">logout</span>
-          <span>Odjava</span>
-        </button>
-      </div>
-    </header>
-
-    <div class="content">
-      <h1 class="page-heading">Početna</h1>
-
-      <div class="grid">
-
-        <!-- Raspoloživo stanje -->
-        <div class="card card--balance">
-          <div class="card__head">
-            <span class="card__label">RASPOLOŽIVO STANJE</span>
-            <span class="material-icons card__more">more_horiz</span>
+        <!-- Balance card -->
+        <div class="z-card p-5 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Raspoloživo stanje</span>
+            <span class="material-icons text-muted-foreground/60 text-xl cursor-pointer">more_horiz</span>
           </div>
 
           <ng-container *ngIf="loading">
-            <div class="skel skel--lg"></div>
-            <div class="skel skel--chart"></div>
+            <div class="z-skeleton h-8 w-48 mb-3"></div>
+            <div class="z-skeleton h-20 w-full"></div>
           </ng-container>
 
           <ng-container *ngIf="!loading && !error">
-            <div class="balance">
-              <span class="balance__amount">{{ formatAmount(totalAvailableBalance) }}</span>
-              <span class="badge badge--up">+10.2%</span>
+            <div class="flex items-baseline gap-3 mb-3">
+              <span class="text-2xl font-bold text-foreground">{{ formatAmount(totalAvailableBalance) }}</span>
+              <span class="z-badge-green">+10.2%</span>
             </div>
-            <svg class="mini-chart" viewBox="0 0 300 80" preserveAspectRatio="none">
+            <svg class="w-full h-20 block" viewBox="0 0 300 80" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#22c55e" stop-opacity="0.25"/>
@@ -64,77 +39,144 @@
           </ng-container>
 
           <ng-container *ngIf="!loading && error">
-            <p class="error-msg">Greška pri učitavanju računa.</p>
+            <p class="text-sm text-red-500 py-3">Greška pri učitavanju računa.</p>
           </ng-container>
         </div>
 
-        <!-- Novo plaćanje -->
-        <div class="card card--action" routerLink="/accounts/payment/new" style="cursor: pointer;">
-          <div class="action-circle">
-            <span class="material-icons">swap_horiz</span>
+        <!-- New payment card -->
+        <div class="z-card p-5 flex flex-col items-center justify-center gap-3 cursor-pointer min-h-[130px] hover:shadow-md transition-shadow group"
+             routerLink="/accounts/payment/new">
+          <div class="w-14 h-14 rounded-full bg-primary flex items-center justify-center transition-transform group-hover:scale-105">
+            <span class="material-icons text-white text-2xl">swap_horiz</span>
           </div>
-          <span class="action-label">Novo plaćanje</span>
+          <span class="text-sm font-semibold text-foreground">Novo plaćanje</span>
         </div>
 
-        <!-- Računi -->
-        <div class="card card--accounts">
-          <div class="card__head">
-            <span class="card__label">RAČUNI</span>
+        <!-- Accounts card -->
+        <div class="z-card p-5 row-span-2 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Računi</span>
+            <a routerLink="/accounts" class="text-xs text-primary hover:underline font-medium">Svi računi</a>
           </div>
 
           <ng-container *ngIf="loading">
-            <div *ngFor="let i of [1,2]" class="skel-account">
-              <div class="skel skel--line"></div>
-              <div class="skel skel--line skel--short"></div>
+            <div *ngFor="let i of [1,2]" class="py-3 border-b border-border last:border-0">
+              <div class="z-skeleton h-3.5 w-full mb-1.5"></div>
+              <div class="z-skeleton h-3.5 w-1/2"></div>
             </div>
           </ng-container>
 
-          <p *ngIf="!loading && accounts.length === 0" class="placeholder-msg">
+          <p *ngIf="!loading && accounts.length === 0" class="text-sm text-muted-foreground text-center py-5 italic">
             Nema aktivnih računa.
           </p>
 
-          <div *ngFor="let acc of accounts" class="acc-item">
-            <div class="acc-item__row">
-              <span class="acc-item__type">{{ acc.name }}</span>
-              <span class="acc-item__num">{{ acc.accountNumber }}</span>
+          <div *ngFor="let acc of accounts"
+               class="py-3 border-b border-muted last:border-0 cursor-pointer rounded-lg px-2 -mx-2 transition-colors"
+               [class.bg-secondary]="isSelected(acc)"
+               (click)="selectAccount(acc)">
+            <div class="flex justify-between mb-0.5">
+              <span class="text-xs text-muted-foreground font-medium">{{ acc.name }}</span>
+              <span class="text-[11px] text-muted-foreground/70 font-mono">{{ acc.accountNumber }}</span>
             </div>
-            <div class="acc-item__amount">
+            <div class="text-lg font-bold text-foreground mb-1.5">
               {{ formatAmount(acc.availableBalance, acc.currency) }}
             </div>
-            <div class="acc-item__track">
-              <div class="acc-item__fill" [style.width.%]="getBalancePercent(acc)"></div>
+            <div class="h-1 bg-muted rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full transition-all duration-500" [style.width.%]="getBalancePercent(acc)"></div>
             </div>
           </div>
         </div>
 
-        <!-- Poslednje transakcije — placeholder -->
-        <div class="card card--transactions">
-          <div class="card__head">
-            <span class="card__label">PREGLED TRANSAKCIJA</span>
-            <div class="card__filter">
-              Prethodnih 7 dana <span class="material-icons">expand_more</span>
+        <!-- Transactions card -->
+        <div class="z-card p-5 col-span-2 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Pregled transakcija</span>
+            <div class="flex items-center gap-3">
+              <span *ngIf="selectedAccount" class="text-xs text-muted-foreground font-medium">
+                {{ selectedAccount.name }}
+              </span>
+              <a routerLink="/payments" class="text-xs text-primary hover:underline font-medium">Sve transakcije</a>
             </div>
           </div>
-          <p class="placeholder-msg">Poslednje transakcije — dostupno uskoro.</p>
+
+          <ng-container *ngIf="transactionsLoading">
+            <div *ngFor="let i of [1,2,3,4,5]" class="py-2.5 border-b border-border last:border-0">
+              <div class="z-skeleton h-3.5 w-full mb-1"></div>
+              <div class="z-skeleton h-3.5 w-1/2"></div>
+            </div>
+          </ng-container>
+
+          <p *ngIf="!transactionsLoading && transactionsError" class="text-sm text-red-500 py-3">
+            Greška pri učitavanju transakcija.
+          </p>
+
+          <p *ngIf="!transactionsLoading && !transactionsError && transactions.length === 0"
+             class="text-sm text-muted-foreground text-center py-5 italic">
+            Nema transakcija za ovaj račun.
+          </p>
+
+          <table *ngIf="!transactionsLoading && !transactionsError && transactions.length > 0" class="z-table">
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Primalac</th>
+                <th>Tip</th>
+                <th>Iznos</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tx of transactions">
+                <td class="text-muted-foreground whitespace-nowrap">{{ formatDate(tx.createdAt) }}</td>
+                <td class="font-medium">{{ tx.recipientName }}</td>
+                <td>
+                  <span class="z-badge" [ngClass]="{
+                    'z-badge-blue': tx.type === 'TRANSFER',
+                    'z-badge-gray': tx.type === 'PAYMENT',
+                    'z-badge-green': tx.type === 'DEPOSIT',
+                    'z-badge-yellow': tx.type === 'WITHDRAWAL'
+                  }">{{ getTypeLabel(tx.type) }}</span>
+                </td>
+                <td class="font-semibold whitespace-nowrap">{{ formatAmount(tx.amount, tx.currency) }}</td>
+                <td>
+                  <span class="z-badge" [ngClass]="{
+                    'z-badge-green': tx.status === 'COMPLETED',
+                    'z-badge-gray': tx.status === 'PENDING',
+                    'z-badge-red': tx.status === 'FAILED',
+                    'z-badge-yellow': tx.status === 'CANCELLED'
+                  }">{{ getStatusLabel(tx.status) }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <!-- Menjačnica — placeholder -->
-        <div class="card card--exchange">
-          <div class="card__head">
-            <span class="card__label">MENJAČNICA</span>
+        <!-- Exchange placeholder -->
+        <div class="z-card p-5 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Menjačnica</span>
           </div>
-          <p class="placeholder-msg">Kalkulator menjačnice — dostupno uskoro.</p>
+          <div class="text-center py-4">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-secondary flex items-center justify-center">
+              <span class="material-icons text-primary text-xl">currency_exchange</span>
+            </div>
+            <p class="text-sm text-muted-foreground italic">Kalkulator menjačnice — dostupno uskoro.</p>
+          </div>
         </div>
 
-        <!-- Brzo plaćanje — placeholder -->
-        <div class="card card--quick">
-          <div class="card__head">
-            <span class="card__label">BRZO PLAĆANJE</span>
+        <!-- Quick payment placeholder -->
+        <div class="z-card p-5 col-span-2 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Brzo plaćanje</span>
           </div>
-          <p class="placeholder-msg">Brzo plaćanje — dostupno uskoro.</p>
+          <div class="text-center py-4">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-secondary flex items-center justify-center">
+              <span class="material-icons text-primary text-xl">bolt</span>
+            </div>
+            <p class="text-sm text-muted-foreground italic">Brzo plaćanje — dostupno uskoro.</p>
+          </div>
         </div>
 
       </div>
     </div>
   </div>
-</div>

@@ -1,264 +1,185 @@
-<div class="layout">
-  <app-navbar></app-navbar>
+<app-navbar></app-navbar>
 
-  <div class="main">
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="topbar__left">
-        <span class="material-icons topbar__page-icon">currency_exchange</span>
-        <h1 class="topbar__title">Transfer</h1>
-      </div>
-      <div class="topbar__right">
-        <button class="topbar__icon-btn" title="Obaveštenja">
-          <span class="material-icons">notifications</span>
-        </button>
-        <button class="topbar__logout" (click)="logout()">
-          <span class="material-icons">logout</span>
-          <span>Odjava</span>
-        </button>
-      </div>
-    </header>
-
-    <div class="content">
-      <!-- Hero card -->
-      <div class="hero-card">
-        <div class="hero-decoration">
-          <div class="hero-circle hero-circle--1"></div>
-          <div class="hero-circle hero-circle--2"></div>
+<div class="page-layout">
+  <div class="page-content max-w-3xl">
+    <!-- Hero card -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-900 to-green-600 text-white p-8 mb-6">
+      <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5"></div>
+      <div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/5"></div>
+      <div class="relative flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         </div>
-        <div class="hero-body">
-          <div class="hero-icon-wrap">
-            <span class="material-icons">currency_exchange</span>
-          </div>
-          <div>
-            <h2 class="hero-heading">Transfer sredstava</h2>
-            <p class="hero-desc">Prebacite novac između računa različitih valuta — sa prikazom kursa i provizije.</p>
-          </div>
+        <div>
+          <h2 class="text-xl font-bold">Transfer sredstava</h2>
+          <p class="text-sm text-green-100 mt-1">Prebacite novac između računa različitih valuta — sa prikazom kursa i provizije.</p>
         </div>
       </div>
+    </div>
 
-      <!-- Loading -->
-      <div class="state-card" *ngIf="isLoading">
-        <div class="skel skel--lg"></div>
-        <div class="skel skel--line"></div>
-        <div class="skel skel--line skel--short"></div>
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="z-card p-8">
+      <div class="space-y-4 animate-pulse">
+        <div class="h-6 bg-muted rounded w-1/3"></div>
+        <div class="h-4 bg-muted rounded w-full"></div>
+        <div class="h-4 bg-muted rounded w-2/3"></div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Form -->
+    <div class="z-card" *ngIf="!isLoading && step === 'form'">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-border">
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">DETALJI TRANSFERA</span>
+        <span class="text-xs text-muted-foreground">Korak 1 od 2</span>
       </div>
 
-      <!-- STEP 1: Form -->
-      <div class="card" *ngIf="!isLoading && step === 'form'">
-        <div class="card__head">
-          <span class="card__label">DETALJI TRANSFERA</span>
-          <span class="card__step">Korak 1 od 2</span>
+      <form [formGroup]="transferForm" (ngSubmit)="onContinue()" class="p-6 space-y-5" data-cy="transfer-diff-form">
+        <div>
+          <label class="z-label" for="fromAccount">Sa računa</label>
+          <select id="fromAccount" class="z-select" formControlName="fromAccountNumber" (change)="onFromAccountChange()" data-cy="from-account-select">
+            <option [ngValue]="null" disabled>Izaberite izvorni račun</option>
+            <option *ngFor="let acc of accounts" [value]="acc.accountNumber">{{ formatAccountLabel(acc) }}</option>
+          </select>
         </div>
 
-        <form
-          [formGroup]="transferForm"
-          (ngSubmit)="onContinue()"
-          class="transfer-form"
-          data-cy="transfer-diff-form"
-        >
-          <!-- Sa računa -->
-          <div class="form-group">
-            <label class="form-label" for="fromAccount">
-              <span class="material-icons form-label-icon">account_balance</span>
-              Sa računa
-            </label>
-            <select
-              id="fromAccount"
-              class="form-control"
-              formControlName="fromAccountId"
-              (change)="onFromAccountChange()"
-              data-cy="from-account-select"
-            >
-              <option [ngValue]="null" disabled>Izaberite izvorni račun</option>
-              <option *ngFor="let acc of accounts" [value]="acc.id">
-                {{ formatAccountLabel(acc) }}
-              </option>
-            </select>
+        <div class="flex justify-center" *ngIf="selectedFromAccount">
+          <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
           </div>
+        </div>
 
-          <!-- Arrow indicator -->
-          <div class="transfer-arrow" *ngIf="selectedFromAccount">
-            <span class="material-icons">arrow_downward</span>
+        <div>
+          <label class="z-label" for="toAccount">Na račun</label>
+          <select id="toAccount" class="z-select" formControlName="toAccountNumber" (change)="onToAccountChange()"
+                  [attr.disabled]="!selectedFromAccount || filteredToAccounts.length === 0 ? '' : null" data-cy="to-account-select">
+            <option [ngValue]="null" disabled>Izaberite odredišni račun</option>
+            <option *ngFor="let acc of filteredToAccounts" [value]="acc.accountNumber">{{ formatAccountLabel(acc) }}</option>
+          </select>
+          <div *ngIf="selectedFromAccount && filteredToAccounts.length === 0"
+               class="flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>Nemate račune u drugoj valuti za transfer.</span>
           </div>
+        </div>
 
-          <!-- Na račun -->
-          <div class="form-group">
-            <label class="form-label" for="toAccount">
-              <span class="material-icons form-label-icon">account_balance</span>
-              Na račun
-            </label>
-            <select
-              id="toAccount"
-              class="form-control"
-              formControlName="toAccountId"
-              (change)="onToAccountChange()"
-              [attr.disabled]="!selectedFromAccount || filteredToAccounts.length === 0 ? '' : null"
-              data-cy="to-account-select"
-            >
-              <option [ngValue]="null" disabled>Izaberite odredišni račun</option>
-              <option *ngFor="let acc of filteredToAccounts" [value]="acc.id">
-                {{ formatAccountLabel(acc) }}
-              </option>
-            </select>
-            <div class="warning-banner" *ngIf="selectedFromAccount && filteredToAccounts.length === 0">
-              <span class="material-icons">warning_amber</span>
-              <span>Nemate račune u drugoj valuti za transfer.</span>
-            </div>
+        <div>
+          <label class="z-label" for="amount">Iznos ({{ selectedFromAccount?.currency || '—' }})</label>
+          <div class="relative">
+            <input id="amount" type="number" class="z-input pr-16" formControlName="amount" placeholder="0.00" step="0.01" data-cy="amount-input"
+                   [class.border-red-400]="amountError" />
+            <span *ngIf="selectedFromAccount" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded">{{ selectedFromAccount.currency }}</span>
           </div>
+          <p *ngIf="amountError" class="z-error flex items-center gap-1" data-cy="amount-error">{{ amountError }}</p>
+          <p *ngIf="selectedFromAccount" class="text-xs text-muted-foreground mt-1">
+            Raspoloživo: {{ formatCurrency(selectedFromAccount.availableBalance, selectedFromAccount.currency) }}
+          </p>
+        </div>
 
-          <!-- Iznos -->
-          <div class="form-group">
-            <label class="form-label" for="amount">
-              <span class="material-icons form-label-icon">payments</span>
-              Iznos ({{ selectedFromAccount?.currency || '—' }})
-            </label>
-            <div class="input-wrap">
-              <input
-                id="amount"
-                type="number"
-                class="form-control form-control--amount"
-                formControlName="amount"
-                placeholder="0.00"
-                step="0.01"
-                data-cy="amount-input"
-                [class.has-error]="amountError"
-              />
-              <span class="input-currency" *ngIf="selectedFromAccount">{{ selectedFromAccount.currency }}</span>
-            </div>
-            <div class="error-text" *ngIf="amountError" data-cy="amount-error">
-              <span class="material-icons error-icon">error_outline</span>
-              {{ amountError }}
-            </div>
-            <div class="balance-hint" *ngIf="selectedFromAccount">
-              <span class="material-icons hint-icon">info_outline</span>
-              Raspoloživo: {{ formatCurrency(selectedFromAccount.availableBalance, selectedFromAccount.currency) }}
-            </div>
-          </div>
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="z-btn-primary flex items-center gap-2" [disabled]="transferForm.invalid" data-cy="continue-btn">
+            Nastavi
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </div>
+      </form>
+    </div>
 
-          <div class="form-actions">
-            <button
-              type="submit"
-              class="btn-primary"
-              [disabled]="transferForm.invalid || isPreviewLoading"
-              data-cy="continue-btn"
-            >
-              <span class="material-icons btn-icon-left spin" *ngIf="isPreviewLoading">sync</span>
-              {{ isPreviewLoading ? 'Učitavanje...' : 'Nastavi' }}
-              <span class="material-icons btn-icon-right" *ngIf="!isPreviewLoading">arrow_forward</span>
-            </button>
-          </div>
-        </form>
+    <!-- STEP 2: Confirmation -->
+    <div class="z-card" *ngIf="step === 'confirm'" data-cy="confirm-section">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-border">
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">POTVRDA TRANSFERA</span>
+        <span class="text-xs text-muted-foreground">Korak 2 od 2</span>
       </div>
 
-      <!-- STEP 2: Confirmation with preview -->
-      <div class="card" *ngIf="step === 'confirm' && preview" data-cy="confirm-section">
-        <div class="card__head">
-          <span class="card__label">POTVRDA TRANSFERA</span>
-          <span class="card__step">Korak 2 od 2</span>
-        </div>
-
-        <div class="confirm-visual">
-          <div class="confirm-acc">
-            <span class="confirm-acc-label">Od</span>
-            <span class="confirm-acc-name">{{ selectedFromAccount?.name }}</span>
-            <span class="confirm-acc-num">{{ selectedFromAccount?.accountNumber }}</span>
+      <div class="p-6 space-y-6">
+        <!-- From → To visual -->
+        <div class="flex items-center gap-4">
+          <div class="flex-1 p-4 rounded-xl bg-muted/50 border border-border text-center">
+            <span class="text-xs text-muted-foreground uppercase">Od</span>
+            <p class="font-semibold text-foreground mt-1">{{ selectedFromAccount?.name }}</p>
+            <p class="text-xs text-muted-foreground font-mono">{{ selectedFromAccount?.accountNumber }}</p>
           </div>
-          <div class="confirm-arrow-wrap">
-            <span class="material-icons confirm-arrow-icon">arrow_forward</span>
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </div>
-          <div class="confirm-acc">
-            <span class="confirm-acc-label">Ka</span>
-            <span class="confirm-acc-name">{{ selectedToAccount?.name }}</span>
-            <span class="confirm-acc-num">{{ selectedToAccount?.accountNumber }}</span>
+          <div class="flex-1 p-4 rounded-xl bg-muted/50 border border-border text-center">
+            <span class="text-xs text-muted-foreground uppercase">Ka</span>
+            <p class="font-semibold text-foreground mt-1">{{ selectedToAccount?.name }}</p>
+            <p class="text-xs text-muted-foreground font-mono">{{ selectedToAccount?.accountNumber }}</p>
           </div>
         </div>
 
-        <!-- Preview details -->
-        <div class="preview-grid">
-          <div class="preview-row" data-cy="preview-owner">
-            <span class="preview-label">
-              <span class="material-icons preview-icon">person</span>
-              Ime i prezime
-            </span>
-            <span class="preview-value">{{ preview.ownerName }}</span>
+        <!-- Transfer details -->
+        <div class="divide-y divide-border rounded-xl border border-border overflow-hidden">
+          <div class="flex justify-between items-center px-4 py-3 bg-card" data-cy="preview-from">
+            <span class="text-sm text-muted-foreground">Sa računa</span>
+            <span class="text-sm font-mono">{{ selectedFromAccount?.accountNumber }}</span>
           </div>
-          <div class="preview-row" data-cy="preview-from">
-            <span class="preview-label">
-              <span class="material-icons preview-icon">account_balance</span>
-              Sa računa
-            </span>
-            <span class="preview-value preview-value--mono">{{ preview.fromAccount }}</span>
+          <div class="flex justify-between items-center px-4 py-3 bg-card" data-cy="preview-to">
+            <span class="text-sm text-muted-foreground">Na račun</span>
+            <span class="text-sm font-mono">{{ selectedToAccount?.accountNumber }}</span>
           </div>
-          <div class="preview-row" data-cy="preview-to">
-            <span class="preview-label">
-              <span class="material-icons preview-icon">account_balance</span>
-              Na račun
-            </span>
-            <span class="preview-value preview-value--mono">{{ preview.toAccount }}</span>
-          </div>
-          <div class="preview-row" data-cy="preview-amount">
-            <span class="preview-label">
-              <span class="material-icons preview-icon">payments</span>
-              Početni iznos
-            </span>
-            <span class="preview-value">{{ formatCurrency(preview.originalAmount, preview.fromCurrency) }}</span>
-          </div>
-          <div class="preview-row" data-cy="preview-rate">
-            <span class="preview-label">
-              <span class="material-icons preview-icon">swap_vert</span>
-              Kurs konverzije
-            </span>
-            <span class="preview-value">{{ preview.exchangeRate }}</span>
-          </div>
-          <div class="preview-row" data-cy="preview-commission">
-            <span class="preview-label">
-              <span class="material-icons preview-icon">receipt_long</span>
-              Provizija
-            </span>
-            <span class="preview-value">{{ formatCurrency(preview.commission, preview.commissionCurrency) }}</span>
+          <div class="flex justify-between items-center px-4 py-3 bg-card" data-cy="preview-amount">
+            <span class="text-sm text-muted-foreground">Iznos</span>
+            <span class="text-sm font-medium">{{ formatCurrency(transferForm.value.amount, selectedFromAccount?.currency || '') }}</span>
           </div>
         </div>
 
-        <!-- Final amount highlight -->
-        <div class="confirm-amount-card" data-cy="preview-final">
-          <span class="confirm-amount-label">Krajnji iznos</span>
-          <span class="confirm-amount-value">{{ formatCurrency(preview.finalAmount, preview.toCurrency) }}</span>
-          <span class="confirm-amount-note">Sa uračunatom provizijom</span>
-        </div>
+        <p class="text-xs text-muted-foreground text-center">
+          Kurs konverzije i provizija biće prikazani nakon potvrde transfera.
+        </p>
 
-        <div class="confirm-actions">
-          <button type="button" class="btn-secondary" (click)="onBack()" data-cy="back-btn">
-            <span class="material-icons btn-icon-left">arrow_back</span>
+        <div class="flex justify-between pt-2">
+          <button type="button" class="z-btn-outline flex items-center gap-2" (click)="onBack()" data-cy="back-btn">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             Nazad
           </button>
-          <button type="button" class="btn-primary" (click)="onConfirm()" [disabled]="isSubmitting" data-cy="confirm-btn">
+          <button type="button" class="z-btn-primary flex items-center gap-2" (click)="onConfirm()" [disabled]="isSubmitting" data-cy="confirm-btn">
             {{ isSubmitting ? 'Obrada...' : 'Potvrdi transfer' }}
-            <span class="material-icons btn-icon-right" *ngIf="!isSubmitting">check</span>
+            <svg *ngIf="!isSubmitting" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- STEP 3: Success -->
-      <div class="card card--success" *ngIf="step === 'success'" data-cy="success-section">
-        <div class="success-body">
-          <div class="success-check">
-            <span class="material-icons">check</span>
-          </div>
-          <h2 class="success-title">Transfer uspešan!</h2>
-          <p class="success-text" *ngIf="preview">
-            Prebačeno
-            <strong>{{ formatCurrency(preview.originalAmount, preview.fromCurrency) }}</strong>
-            &rarr;
-            <strong>{{ formatCurrency(preview.finalAmount, preview.toCurrency) }}</strong>
-          </p>
-          <button type="button" class="btn-primary" (click)="onNewTransfer()" data-cy="new-transfer-btn">
-            <span class="material-icons btn-icon-left">add</span>
-            Novi transfer
-          </button>
+    <!-- STEP 3: Success -->
+    <div class="z-card text-center p-10" *ngIf="step === 'success'" data-cy="success-section">
+      <div class="w-20 h-20 mx-auto rounded-full bg-green-100 flex items-center justify-center animate-[scale-in_0.3s_ease-out]">
+        <svg class="w-10 h-10 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2 class="text-xl font-bold text-foreground mt-4">Transfer uspešan!</h2>
+
+      <div *ngIf="transferResult" class="mt-6 divide-y divide-border rounded-xl border border-border overflow-hidden text-left">
+        <div class="flex justify-between items-center px-4 py-3 bg-card">
+          <span class="text-sm text-muted-foreground">Početni iznos</span>
+          <span class="text-sm font-medium">{{ formatCurrency(transferResult.initialAmount, selectedFromAccount?.currency || '') }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-3 bg-card">
+          <span class="text-sm text-muted-foreground">Kurs konverzije</span>
+          <span class="text-sm font-medium">{{ transferResult.exchangeRate }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-3 bg-card">
+          <span class="text-sm text-muted-foreground">Provizija</span>
+          <span class="text-sm font-medium">{{ formatCurrency(transferResult.commission, selectedFromAccount?.currency || '') }}</span>
+        </div>
+        <div class="flex justify-between items-center px-4 py-3 bg-card">
+          <span class="text-sm text-muted-foreground">Krajnji iznos</span>
+          <span class="text-sm font-semibold text-green-700">{{ formatCurrency(transferResult.finalAmount, selectedToAccount?.currency || '') }}</span>
         </div>
       </div>
 
+      <button type="button" class="z-btn-primary mt-6 flex items-center gap-2 mx-auto" (click)="onNewTransfer()" data-cy="new-transfer-btn">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Novi transfer
+      </button>
     </div>
   </div>
 </div>
+
+<app-verification-modal
+  *ngIf="showVerificationModal"
+  operationType="TRANSFER"
+  [relatedEntityId]="selectedFromAccount?.accountNumber || ''"
+  (confirmed)="handleVerification($event)"
+  (closed)="showVerificationModal = false">
+</app-verification-modal>

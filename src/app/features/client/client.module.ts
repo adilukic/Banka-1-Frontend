@@ -5,10 +5,10 @@ import { ClientRoutingModule } from './client-routing.module';
 import { AccountListComponent } from './components/account-list/account-list.component';
 import { AccountDetailsModalComponent } from "./modals/account-details-modal/account-details-modal.component";
 import { NewPaymentComponent } from './components/new-payment/new-payment.component';
+import { TransactionDetailModalComponent } from './modals/transaction-detail-modal/transaction-detail-modal.component';
 @NgModule({
   declarations: [
-  
-    
+
   ],
   imports: [
     CommonModule,
@@ -16,7 +16,9 @@ import { NewPaymentComponent } from './components/new-payment/new-payment.compon
     FormsModule,
     ClientRoutingModule,
     AccountListComponent,
-    AccountDetailsModalComponent
+    AccountDetailsModalComponent,
+    TransactionDetailModalComponent,
+    NewPaymentComponent
   ]
 })
 export class ClientModule {}

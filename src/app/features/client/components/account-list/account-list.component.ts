@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Account } from '../../models/account.model';
+import { Transaction } from '../../models/transaction.model';
 import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 import { AccountDetailsModalComponent } from '../../modals/account-details-modal/account-details-modal.component';
 import { AccountService } from '../../services/account.service';
@@ -21,6 +22,8 @@ export class AccountListComponent implements OnInit {
   public isDetailsModalOpen = false;
   public isLoading = false;
   public errorMessage = '';
+  public transactions: Transaction[] = [];
+  public transactionsLoading = false;
 
   constructor(
     private readonly accountService: AccountService,
@@ -42,7 +45,7 @@ export class AccountListComponent implements OnInit {
    * - Kada backend bude potpuno stabilan i više ne bude potrebe za lokalnim prikazom,
    *   zakomentarisani mock deo moze da se obrise.
    */
-  private loadAccounts(): void {
+  public loadAccounts(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -53,7 +56,7 @@ export class AccountListComponent implements OnInit {
           .sort((a, b) => b.availableBalance - a.availableBalance);
 
         if (this.accounts.length > 0) {
-          this.selectedAccount = this.accounts[0];
+          this.selectAccount(this.accounts[0]);
         }
 
         this.isLoading = false;
@@ -66,163 +69,6 @@ export class AccountListComponent implements OnInit {
           'Greška pri učitavanju računa. Pokušajte ponovo.';
       }
     });
-
-
-    // Privremeni mock podaci korisceni dok backend nije gotov
-    // Ostavljen je zakomentarisan da bi se lako video izgled stranice
-    // const mockAccounts: Account[] = [
-    //   {
-    //     id: 1,
-    //     name: 'Glavni tekući račun',
-    //     accountNumber: '265000000001111111',
-    //     balance: 152340.75,
-    //     availableBalance: 152340.75,
-    //     reservedFunds: 0,
-    //     currency: 'RSD',
-    //     status: 'ACTIVE',
-    //     subtype: 'STANDARD',
-    //     ownerId: 101,
-    //     ownerName: 'Nikola Ilibasic',
-    //     employeeId: 12,
-    //     maintenanceFee: 350,
-    //     dailyLimit: 300000,
-    //     monthlyLimit: 2500000,
-    //     dailySpending: 12500,
-    //     monthlySpending: 184500,
-    //     createdAt: '2024-03-11T10:15:00',
-    //     expiryDate: '2034-03-11T10:15:00'
-    //   },
-    //   {
-    //     id: 2,
-    //     name: 'Štedni račun',
-    //     accountNumber: '265000000001111113',
-    //     balance: 845000.00,
-    //     availableBalance: 845000.00,
-    //     reservedFunds: 0,
-    //     currency: 'RSD',
-    //     status: 'ACTIVE',
-    //     subtype: 'SAVINGS',
-    //     ownerId: 101,
-    //     ownerName: 'Nikola Ilibasic',
-    //     employeeId: 12,
-    //     maintenanceFee: 0,
-    //     dailyLimit: 0,
-    //     monthlyLimit: 0,
-    //     dailySpending: 0,
-    //     monthlySpending: 0,
-    //     createdAt: '2024-05-02T09:30:00',
-    //     expiryDate: '2034-05-02T09:30:00'
-    //   },
-    //   {
-    //     id: 3,
-    //     name: 'Devizni lični račun',
-    //     accountNumber: '265000000001111121',
-    //     balance: 2480.50,
-    //     availableBalance: 2480.50,
-    //     reservedFunds: 0,
-    //     currency: 'EUR',
-    //     status: 'ACTIVE',
-    //     subtype: 'FOREIGN_PERSONAL',
-    //     ownerId: 101,
-    //     ownerName: 'Nikola Ilibasic',
-    //     employeeId: 15,
-    //     maintenanceFee: 180,
-    //     dailyLimit: 5000,
-    //     monthlyLimit: 40000,
-    //     dailySpending: 120,
-    //     monthlySpending: 960,
-    //     createdAt: '2024-06-18T13:45:00',
-    //     expiryDate: '2034-06-18T13:45:00'
-    //   },
-    //   {
-    //     id: 4,
-    //     name: 'Studentski račun',
-    //     accountNumber: '265000000001111116',
-    //     balance: 12500.00,
-    //     availableBalance: 12500.00,
-    //     reservedFunds: 0,
-    //     currency: 'RSD',
-    //     status: 'INACTIVE',
-    //     subtype: 'STUDENT',
-    //     ownerId: 101,
-    //     ownerName: 'Nikola Ilibasic',
-    //     employeeId: 9,
-    //     maintenanceFee: 0,
-    //     dailyLimit: 50000,
-    //     monthlyLimit: 300000,
-    //     dailySpending: 0,
-    //     monthlySpending: 0,
-    //     createdAt: '2023-10-01T08:00:00',
-    //     expiryDate: '2033-10-01T08:00:00'
-    //   },
-    //   {
-    //     id: 5,
-    //     name: 'Glavni poslovni račun',
-    //     accountNumber: '265000000001111112',
-    //     balance: 456780.55,
-    //     availableBalance: 438000.55,
-    //     reservedFunds: 18780.00,
-    //     currency: 'RSD',
-    //     status: 'ACTIVE',
-    //     subtype: 'DOO',
-    //     ownerId: 201,
-    //     ownerName: 'Petar Petrović',
-    //     employeeId: 7,
-    //     maintenanceFee: 990,
-    //     dailyLimit: 1500000,
-    //     monthlyLimit: 12000000,
-    //     dailySpending: 245000,
-    //     monthlySpending: 1780000,
-    //     createdAt: '2024-07-10T09:00:00',
-    //     expiryDate: '2034-07-10T09:00:00',
-    //     company: {
-    //       name: 'Tech Solutions DOO Novi Sad',
-    //       registrationNumber: '21987654',
-    //       taxId: '114567890',
-    //       activityCode: '6201',
-    //       address: 'Bulevar oslobođenja 15, Novi Sad'
-    //     }
-    //   },
-    //   {
-    //     id: 6,
-    //     name: 'Devizni poslovni račun',
-    //     accountNumber: '265000000001111122',
-    //     balance: 12540.80,
-    //     availableBalance: 11990.80,
-    //     reservedFunds: 550.00,
-    //     currency: 'EUR',
-    //     status: 'ACTIVE',
-    //     subtype: 'FOREIGN_BUSINESS',
-    //     ownerId: 201,
-    //     ownerName: 'Petar Petrović',
-    //     employeeId: 7,
-    //     maintenanceFee: 1200,
-    //     dailyLimit: 25000,
-    //     monthlyLimit: 200000,
-    //     dailySpending: 320,
-    //     monthlySpending: 8450,
-    //     createdAt: '2024-08-01T10:30:00',
-    //     expiryDate: '2034-08-01T10:30:00',
-    //     company: {
-    //       name: 'Tech Solutions DOO Novi Sad',
-    //       registrationNumber: '21987654',
-    //       taxId: '114567890',
-    //       activityCode: '6201',
-    //       address: 'Bulevar oslobođenja 15, Novi Sad'
-    //     }
-    //   }
-    // ];
-
-    // this.accounts = mockAccounts
-    //   .filter((acc) => acc.status === 'ACTIVE')
-    //   .sort((a, b) => b.availableBalance - a.availableBalance);
-
-    // if (this.accounts.length > 0) {
-    //   this.selectedAccount = this.accounts[0];
-    // }
-
-    // this.isLoading = false;
-
   }
 
   /**
@@ -231,6 +77,7 @@ export class AccountListComponent implements OnInit {
    */
   public selectAccount(account: Account): void {
     this.selectedAccount = account;
+    this.loadTransactions(account.accountNumber);
   }
 
   /**
@@ -326,5 +173,39 @@ export class AccountListComponent implements OnInit {
 
   public onCreateAccount(): void {
     this.router.navigate(['/accounts/new']);
+  }
+
+  private loadTransactions(accountNumber: string): void {
+    this.transactionsLoading = true;
+    this.transactions = [];
+
+    this.accountService.getTransactions(accountNumber, 0, 5).subscribe({
+      next: (data: Transaction[]) => {
+        this.transactions = data ?? [];
+        this.transactionsLoading = false;
+      },
+      error: () => {
+        this.transactions = [];
+        this.transactionsLoading = false;
+      }
+    });
+  }
+
+  public formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
+
+  public getStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      COMPLETED: 'Odobreno',
+      PENDING: 'Čekanje',
+      FAILED: 'Odbijeno',
+      CANCELLED: 'Otkazano'
+    };
+    return map[status] ?? status;
   }
 }

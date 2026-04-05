@@ -1,145 +1,140 @@
 <app-navbar />
 
-<div class="page-wrapper">
-  <header class="navbar">
-    <div class="navbar-brand"></div>
-
-     <button type="button" class="btn-logout" (click)="onCreateAccount()">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-        <path d="M16 17l5-5-5-5"></path>
-        <path d="M21 12H9"></path>
-      </svg>
-      Dodaj racun
-    </button>
-
-    <button type="button" class="btn-logout">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-        <path d="M16 17l5-5-5-5"></path>
-        <path d="M21 12H9"></path>
-      </svg>
-      Logout
-    </button>
-  </header>
-
-  <main class="content">
-    <div class="account-list-page">
-      <h1 class="page-title">LISTA RAČUNA</h1>
-
-      <!-- Loading -->
-      <div class="state-box" *ngIf="isLoading">
-        <p>Učitavanje računa...</p>
+<div class="page-layout">
+  <div class="page-content">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-foreground">Lista računa</h1>
+        <p class="text-sm text-muted-foreground mt-1">Pregledajte i upravljajte svim računima</p>
       </div>
-
-      <!-- Error -->
-      <div
-        class="state-box state-box--error"
-        *ngIf="errorMessage && !isLoading"
-      >
-        <p>{{ errorMessage }}</p>
-      </div>
-
-      <!-- Empty -->
-      <div
-        class="state-box"
-        *ngIf="!isLoading && !errorMessage && accounts.length === 0"
-      >
-        <p>Nema aktivnih računa.</p>
-      </div>
-
-      <!-- Lista računa -->
-      <div class="main-layout" *ngIf="!isLoading && accounts.length > 0">
-        <div class="panel accounts-panel">
-          <p class="panel-label">RAČUNI</p>
-
-          <div class="accounts-list">
-            <div
-              class="account-row"
-              *ngFor="let account of accounts"
-              [class.account-row--active]="isSelected(account)"
-              (click)="selectAccount(account)"
-              role="button"
-              [attr.aria-selected]="isSelected(account)"
-              tabindex="0"
-              (keydown.enter)="selectAccount(account)"
-            >
-              <div
-                class="account-thumb"
-                [ngClass]="getAccountGradient(account)"
-              >
-                <span class="account-thumb__currency">{{
-                  account.currency
-                }}</span>
-              </div>
-
-              <div class="account-info">
-                <span class="account-info__name">{{ account.name }}</span>
-                <span class="account-info__number">{{
-                  maskAccountNumber(account.accountNumber)
-                }}</span>
-              </div>
-
-              <div class="account-balance">
-                <span class="account-balance__label">Raspoloživo</span>
-                <span class="account-balance__amount">
-                  {{ formatAmount(account.availableBalance) }}
-                  {{ account.currency }}
-                </span>
-              </div>
-
-              <button
-                class="btn-details"
-                (click)="goToDetails(account, $event)"
-                type="button"
-                [attr.aria-label]="'Detalji računa ' + account.name"
-              >
-                DETALJI &rsaquo;
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Transakcije -->
-      <div class="transactions-section" *ngIf="selectedAccount && !isLoading">
-        <div class="panel transactions-panel">
-          <div class="transactions-header">
-            <p class="panel-label">LISTA TRANSAKCIJA PO RAČUNU</p>
-            <span class="transactions-account-name">{{
-              selectedAccount.name
-            }}</span>
-          </div>
-
-          <div class="transactions-placeholder">
-            <p>Transakcije za ovaj račun biće prikazane ovde.</p>
-          </div>
-        </div>
-      </div>
-
-      <app-account-details-modal
-        *ngIf="isDetailsModalOpen && detailsAccount"
-        [account]="detailsAccount"
-        (close)="closeDetailsModal()"
-      >
-      </app-account-details-modal>
+      <button type="button" (click)="onCreateAccount()"
+              class="z-btn-primary flex items-center gap-2">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Dodaj račun
+      </button>
     </div>
-  </main>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="z-card p-12 text-center text-muted-foreground">
+      <svg class="w-8 h-8 mx-auto animate-spin text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+      </svg>
+      <p class="mt-3 text-sm">Učitavanje računa...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="errorMessage && !isLoading"
+         class="z-card p-8 text-center text-red-500 text-sm">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <!-- Empty -->
+    <div *ngIf="!isLoading && !errorMessage && accounts.length === 0"
+         class="z-card p-12 text-center text-muted-foreground text-sm italic">
+      <p>Nema aktivnih računa.</p>
+    </div>
+
+    <!-- Accounts list -->
+    <div *ngIf="!isLoading && accounts.length > 0" class="z-card p-5 mb-4">
+      <p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-4">Računi</p>
+
+      <div class="flex flex-col gap-0.5">
+        <div *ngFor="let account of accounts"
+             class="flex items-center gap-4 p-4 rounded-xl border border-transparent cursor-pointer transition-all hover:bg-secondary hover:border-green-200"
+             [class.bg-secondary]="isSelected(account)"
+             [class.border-green-300]="isSelected(account)"
+             [class.shadow-sm]="isSelected(account)"
+             (click)="selectAccount(account)"
+             role="button"
+             [attr.aria-selected]="isSelected(account)"
+             tabindex="0"
+             (keydown.enter)="selectAccount(account)">
+
+          <!-- Thumbnail -->
+          <div class="w-14 h-10 rounded-lg flex-shrink-0 flex items-center justify-center shadow-inner"
+               [ngClass]="getAccountGradient(account)">
+            <span class="text-[11px] font-bold text-white/95 tracking-wider">{{ account.currency }}</span>
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <span class="text-[15px] font-semibold text-foreground truncate block">{{ account.name }}</span>
+            <span class="text-xs text-muted-foreground font-mono">{{ maskAccountNumber(account.accountNumber) }}</span>
+          </div>
+
+          <!-- Balance -->
+          <div class="text-right flex-shrink-0">
+            <span class="block text-[11px] text-muted-foreground uppercase tracking-wider mb-0.5">Raspoloživo</span>
+            <span class="text-base font-bold text-foreground">
+              {{ formatAmount(account.availableBalance) }} {{ account.currency }}
+            </span>
+          </div>
+
+          <!-- Details button -->
+          <button type="button" (click)="goToDetails(account, $event)"
+                  [attr.aria-label]="'Detalji računa ' + account.name"
+                  class="z-btn-primary z-btn-sm flex-shrink-0">
+            Detalji &rsaquo;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions -->
+    <div *ngIf="selectedAccount && !isLoading" class="z-card p-5">
+      <div class="flex items-baseline gap-3 mb-4">
+        <p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Lista transakcija po računu</p>
+        <span class="text-xs text-muted-foreground font-medium">{{ selectedAccount.name }}</span>
+      </div>
+
+      <div *ngIf="transactionsLoading" class="py-6 text-center">
+        <svg class="w-6 h-6 mx-auto animate-spin text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+        </svg>
+      </div>
+
+      <div *ngIf="!transactionsLoading && transactions.length === 0"
+           class="py-10 text-center border border-dashed border-border rounded-lg bg-muted/30 text-muted-foreground text-sm">
+        <p>Nema transakcija za ovaj račun.</p>
+      </div>
+
+      <table *ngIf="!transactionsLoading && transactions.length > 0" class="z-table">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Primalac</th>
+            <th>Iznos</th>
+            <th>Valuta</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tx of transactions">
+            <td class="text-muted-foreground whitespace-nowrap">{{ formatDate(tx.createdAt) }}</td>
+            <td class="font-medium">{{ tx.recipientName }}</td>
+            <td class="font-semibold">{{ formatAmount(tx.amount) }} </td>
+            <td>{{ tx.currency }}</td>
+            <td>
+              <span class="z-badge" [ngClass]="{
+                'z-badge-green': tx.status === 'COMPLETED',
+                'z-badge-gray': tx.status === 'PENDING',
+                'z-badge-red': tx.status === 'FAILED',
+                'z-badge-yellow': tx.status === 'CANCELLED'
+              }">{{ getStatusLabel(tx.status) }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
 <app-account-details-modal
   *ngIf="isDetailsModalOpen && detailsAccount"
   [account]="detailsAccount"
   [allAccounts]="accounts"
-  (close)="closeDetailsModal()"
->
+  (close)="closeDetailsModal(); loadAccounts()">
 </app-account-details-modal>

@@ -64,14 +64,34 @@ describe('Home E2E', () => {
       }));
     });
 
+    const mockResponse = {
+      content: mockAccounts.map(a => ({
+        iznos: a.balance,
+        brojRacuna: a.accountNumber,
+        nazivRacuna: a.name,
+        raspolozivoStanje: a.availableBalance,
+        currency: a.currency,
+        accountCategory: a.subtype === 'STANDARD' ? 'CHECKING' : (a.subtype === 'SAVINGS' ? 'SAVINGS' : 'CHECKING'),
+        accountType: a.subtype.includes('BUSINESS') ? 'BUSINESS' : 'PERSONAL'
+      })),
+      totalElements: 2,
+      totalPages: 1
+    };
+
     // Interceptuj API za račune
-    cy.intercept('GET', '**/accounts/my', {
+    cy.intercept('GET', '**/accounts/client/accounts*', {
       statusCode: 200,
-      body: mockAccounts
+      body: mockResponse
     }).as('getAccounts');
 
+    // Mockujemo prazne transakcije da bi se sigurno prikazao no-data div
+    cy.intercept('GET', '**/transactions/employee/accounts/**', {
+      statusCode: 200,
+      body: { content: [], totalElements: 0, totalPages: 0 }
+    }).as('getTransactionsEmpty');
+
     cy.visit('/home');
-    cy.wait('@getAccounts');
+    cy.wait(['@getAccounts', '@getTransactionsEmpty']);
   });
 
   // ─────────────────────────────────────────────
@@ -83,19 +103,19 @@ describe('Home E2E', () => {
     it('treba da prikaže sve navigacione linkove', () => {
       cy.contains('Računi').should('exist');
       cy.contains('Plaćanja').should('exist');
-      cy.contains('Transferi').should('exist');
+      cy.contains('Prenos').should('exist');
+      cy.contains('Transfer').should('exist');
       cy.contains('Menjačnica').should('exist');
-      cy.contains('Kartice').should('exist');
-      cy.contains('Krediti').should('exist');
+      cy.contains('Primaoci plaćanja').should('exist');
     });
 
     it('linkovi treba da imaju ispravne rute', () => {
       cy.get('a[href="/accounts"]').should('exist');
       cy.get('a[href="/payments"]').should('exist');
-      cy.get('a[href="/transfers"]').should('exist');
+      cy.get('a[href="/transfers/same"]').should('exist');
+      cy.get('a[href="/transfers/different"]').should('exist');
       cy.get('a[href="/exchange"]').should('exist');
-      cy.get('a[href="/cards"]').should('exist');
-      cy.get('a[href="/loans"]').should('exist');
+      cy.get('a[href="/payments/recipients"]').should('exist');
     });
 
   });
@@ -133,7 +153,7 @@ describe('Home E2E', () => {
   describe('Pregled računa', () => {
 
     it('treba da prikaže sekciju RASPOLOŽIVO STANJE', () => {
-      cy.contains('RASPOLOŽIVO STANJE').should('exist');
+      cy.contains(/Raspoloživo stanje/i).should('exist');
     });
 
     it('treba da prikaže ukupno raspoloživo stanje', () => {
@@ -142,7 +162,7 @@ describe('Home E2E', () => {
     });
 
     it('treba da prikaže sekciju RAČUNI', () => {
-      cy.contains('RAČUNI').should('exist');
+      cy.contains(/Računi/i).should('exist'); // Case insensitive for uppercase checks due to tailwind lowercase vs uppercase
     });
 
     it('treba da prikaže naziv i broj tekućeg računa', () => {
@@ -165,9 +185,9 @@ describe('Home E2E', () => {
     });
 
     it('treba da prikaže poruku kada nema računa', () => {
-      cy.intercept('GET', '**/accounts/my', {
+      cy.intercept('GET', '**/accounts/client/accounts*', {
         statusCode: 200,
-        body: []
+        body: { content: [], totalElements: 0, totalPages: 1 }
       }).as('getEmptyAccounts');
 
       cy.visit('/home', {
@@ -184,7 +204,7 @@ describe('Home E2E', () => {
     });
 
     it('treba da prikaže error poruku kada API vrati grešku', () => {
-      cy.intercept('GET', '**/accounts/my', {
+      cy.intercept('GET', '**/accounts/client/accounts*', {
         statusCode: 500,
         body: { message: 'Server error' }
       }).as('getAccountsError');
@@ -211,27 +231,27 @@ describe('Home E2E', () => {
   describe('Placeholder sekcije', () => {
 
     it('treba da prikaže sekciju PREGLED TRANSAKCIJA', () => {
-      cy.contains('PREGLED TRANSAKCIJA').should('exist');
+      cy.contains(/Pregled transakcija/i).should('exist');
     });
 
     it('treba da prikaže placeholder za transakcije', () => {
-      cy.contains('Poslednje transakcije').should('exist');
+      cy.contains('Nema transakcija za ovaj račun').should('exist');
     });
 
     it('treba da prikaže sekciju BRZO PLAĆANJE', () => {
-      cy.contains('BRZO PLAĆANJE').should('exist');
+      cy.contains(/Brzo plaćanje/i).should('exist');
     });
 
     it('treba da prikaže placeholder za brzo plaćanje', () => {
-      cy.contains('Brzo plaćanje').should('exist');
+      cy.contains(/Brzo plaćanje — dostupno uskoro/i).should('exist');
     });
 
     it('treba da prikaže sekciju MENJAČNICA', () => {
-      cy.contains('MENJAČNICA').should('exist');
+      cy.contains(/Menjačnica/i).should('exist');
     });
 
     it('treba da prikaže placeholder za menjačnicu', () => {
-      cy.contains('Kalkulator menjačnice').should('exist');
+      cy.contains(/Kalkulator menjačnice — dostupno uskoro/i).should('exist');
     });
 
   });

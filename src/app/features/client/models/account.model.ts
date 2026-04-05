@@ -75,5 +75,10 @@ export interface Account {
 export interface ChangeLimitDto {
   dailyLimit: number;
   monthlyLimit: number;
-  verificationCode: string;
+  verificationSessionId: number;
+}
+export interface PaymentRecipient {
+  id: number;
+  name: string;
+  accountNumber: string;
 }

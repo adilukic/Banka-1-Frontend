@@ -29,6 +29,7 @@ export class ActivateAccountComponent implements OnInit {
 
   private confirmationToken = '';
   private activationId: number | null = null;
+  private userType: 'employee' | 'client' = 'employee';
 
   constructor(
     private readonly authService: AuthService,
@@ -38,6 +39,7 @@ export class ActivateAccountComponent implements OnInit {
   ) {}
 
   public ngOnInit(): void {
+    this.userType = this.activatedRoute.snapshot.data['userType'] ?? 'employee';
     this.confirmationToken = this.activatedRoute.snapshot.queryParamMap.get('token') ?? '';
 
     if (!this.confirmationToken.trim()) {
@@ -48,7 +50,11 @@ export class ActivateAccountComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.authService.checkActivateToken(this.confirmationToken).subscribe({
+    const checkTokenMethod = this.userType === 'client'
+      ? this.authService.checkClientActivateToken(this.confirmationToken)
+      : this.authService.checkActivateToken(this.confirmationToken);
+
+    checkTokenMethod.subscribe({
       next: (id: number) => {
         this.activationId = id;
         this.hasValidActivationToken = true;
@@ -149,7 +155,11 @@ export class ActivateAccountComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.authService.activateAccount(this.activationId, this.confirmationToken, this.password.trim()).subscribe({
+    const activateMethod = this.userType === 'client'
+      ? this.authService.activateClientAccount(this.activationId, this.confirmationToken, this.password.trim())
+      : this.authService.activateAccount(this.activationId, this.confirmationToken, this.password.trim());
+
+    activateMethod.subscribe({
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Account activated!';

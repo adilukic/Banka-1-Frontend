@@ -1,0 +1,332 @@
+<app-navbar></app-navbar>
+
+<div class="page-layout">
+  <div class="page-content">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-foreground">PREGLED PLAĆANJA</h1>
+      
+      <button
+        type="button"
+        (click)="onNewPayment()"
+        class="z-btn-primary flex items-center gap-2"
+      >
+        <svg
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Novo plaćanje
+      </button>
+    </div>
+
+    <div class="mb-4" *ngIf="accounts.length > 1">
+      <label class="z-label">Račun</label>
+      <select
+        class="z-input"
+        [(ngModel)]="selectedAccountNumber"
+        (change)="onAccountChange()"
+      >
+        <option *ngFor="let acc of accounts" [value]="acc.accountNumber">
+          {{ acc.name }} — {{ acc.accountNumber }} ({{ acc.currency }})
+        </option>
+      </select>
+    </div>
+
+    <div class="z-card">
+      <!-- Tabs -->
+      <div class="flex border-b border-border">
+        <button
+          class="px-5 py-3 text-sm font-medium transition-colors border-b-2"
+          [class]="
+            activeTab === 'domestic'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          "
+          (click)="setActiveTab('domestic')"
+        >
+          Domaća plaćanja
+        </button>
+        <button
+          class="px-5 py-3 text-sm font-medium transition-colors border-b-2"
+          [class]="
+            activeTab === 'transfers'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          "
+          (click)="setActiveTab('transfers')"
+        >
+          Transferi
+        </button>
+      </div>
+
+      <div class="p-5">
+        <!-- Section header + filters -->
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-base font-semibold text-foreground">
+            Pregled plaćanja
+          </h2>
+
+          <div class="relative">
+            <button
+              type="button"
+              class="z-btn-outline z-btn-sm flex items-center gap-1.5"
+              (click)="toggleFilterPanel()"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+              Filteri
+            </button>
+
+            <!-- Backdrop -->
+            <div
+              class="fixed inset-0 z-40"
+              *ngIf="isFilterOpen"
+              (click)="closeFilterPanel()"
+            ></div>
+
+            <!-- Filter panel -->
+            <div
+              *ngIf="isFilterOpen"
+              class="absolute right-0 top-full mt-2 w-80 z-50 bg-card rounded-xl border border-border shadow-lg p-5 space-y-4"
+            >
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-semibold">Filteri</h3>
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:text-foreground"
+                  (click)="closeFilterPanel()"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <div>
+                <label for="dateFrom" class="z-label">Datum od</label>
+                <input
+                  id="dateFrom"
+                  type="date"
+                  [(ngModel)]="draftFilters.dateFrom"
+                  class="z-input"
+                />
+              </div>
+              <div>
+                <label for="dateTo" class="z-label">Datum do</label>
+                <input
+                  id="dateTo"
+                  type="date"
+                  [(ngModel)]="draftFilters.dateTo"
+                  class="z-input"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="amountFrom" class="z-label">Iznos od</label>
+                  <input
+                    id="amountFrom"
+                    type="number"
+                    min="0"
+                    [(ngModel)]="draftFilters.amountFrom"
+                    placeholder="0.00"
+                    class="z-input"
+                  />
+                </div>
+                <div>
+                  <label for="amountTo" class="z-label">Iznos do</label>
+                  <input
+                    id="amountTo"
+                    type="number"
+                    min="0"
+                    [(ngModel)]="draftFilters.amountTo"
+                    placeholder="0.00"
+                    class="z-input"
+                  />
+                </div>
+              </div>
+              <div>
+                <label for="status" class="z-label">Status</label>
+                <select
+                  id="status"
+                  [(ngModel)]="draftFilters.status"
+                  class="z-select"
+                >
+                  <option
+                    *ngFor="let status of statusOptions"
+                    [value]="status.value"
+                  >
+                    {{ status.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  class="z-btn-ghost z-btn-sm flex-1"
+                  (click)="clearFilters()"
+                >
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  class="z-btn-primary z-btn-sm flex-1"
+                  (click)="applyFilters()"
+                >
+                  Primeni
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table states -->
+        <div *ngIf="isLoading" class="flex justify-center items-center p-12">
+          <svg
+            class="w-8 h-8 text-primary animate-spin"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+          </svg>
+        </div>
+
+        <div
+          *ngIf="!isLoading && errorMessage"
+          class="text-center p-12 text-red-500 text-sm"
+        >
+          <p>{{ errorMessage }}</p>
+        </div>
+
+        <div
+          *ngIf="!isLoading && !errorMessage && payments.length === 0"
+          class="text-center p-12 text-muted-foreground text-sm"
+        >
+          <p>Nema plaćanja za zadate filtere.</p>
+        </div>
+
+        <table
+          *ngIf="!isLoading && !errorMessage && payments.length > 0"
+          class="z-table"
+        >
+          <thead>
+            <tr>
+              <th>DATUM</th>
+              <th>NAZIV PLATIOCA</th>
+              <th>VALUTA</th>
+              <th>IZNOS</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let payment of payments; trackBy: trackByPaymentId"
+              class="cursor-pointer hover:bg-muted/50"
+              (click)="openTransactionDetails(payment)"
+            >
+              <td class="text-muted-foreground">
+                {{ formatDate(payment.date) }}
+              </td>
+              <td class="font-medium">{{ payment.recipientName }}</td>
+              <td>{{ payment.currency }}</td>
+              <td class="font-semibold">{{ formatAmount(payment.amount) }}</td>
+              <td>
+                <span
+                  class="z-badge"
+                  [ngClass]="getStatusClass(payment.status)"
+                >
+                  {{ getStatusLabel(payment.status) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div
+        *ngIf="!isLoading && !errorMessage && totalElements > 0"
+        class="flex justify-between items-center px-5 py-3 border-t border-border"
+      >
+        <span class="text-sm text-muted-foreground">
+          Prikazuje se {{ currentPage * pageSize + 1 }} do
+          {{ getLastItem() }} od {{ totalElements }} stavke
+        </span>
+        <div class="flex items-center gap-1">
+          <button
+            class="w-8 h-8 inline-flex items-center justify-center border border-border bg-card rounded-lg text-muted-foreground hover:bg-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            [disabled]="currentPage === 0"
+            (click)="goToPage(currentPage - 1)"
+          >
+            <svg
+              class="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <span
+            class="px-3 py-1 text-sm font-medium bg-primary text-white rounded-lg"
+            >{{ currentPage + 1 }}</span
+          >
+          <button
+            class="w-8 h-8 inline-flex items-center justify-center border border-border bg-card rounded-lg text-muted-foreground hover:bg-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            [disabled]="currentPage >= totalPages - 1"
+            (click)="goToPage(currentPage + 1)"
+          >
+            <svg
+              class="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-transaction-detail-modal
+  *ngIf="isDetailsModalOpen && selectedPayment"
+  [payment]="selectedPayment"
+  (close)="closeTransactionDetails()"
+>
+</app-transaction-detail-modal>

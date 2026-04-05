@@ -1,93 +1,126 @@
-<div class="page-wrapper">
-  <app-navbar></app-navbar>
+<app-navbar></app-navbar>
 
-  <main class="content centered-content">
-    <div class="payment-page">
-      <div class="page-header">
-        <h1 class="page-title">NOVO PLAĆANJE</h1>
-        <p class="page-subtitle">Popunite detalje za prenos sredstava</p>
-      </div>
+<div class="page-layout">
+  <div class="page-content max-w-3xl">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold text-foreground">{{ transactionSuccess ? 'UPLATA USPEŠNA' : 'NOVO PLAĆANJE' }}</h1>
+      <p class="text-sm text-muted-foreground mt-1">
+        {{ transactionSuccess ? 'Vaša transakcija je uspešno procesuirana.' : 'Popunite detalje za prenos sredstava' }}
+      </p>
+    </div>
 
-      <div class="state-box" *ngIf="isLoading">
-        <p>Učitavanje podataka...</p>
-      </div>
+    <div *ngIf="isLoading" class="flex justify-center items-center p-12">
+      <svg class="w-8 h-8 text-primary animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+    </div>
 
-      <div class="panel form-panel" *ngIf="!isLoading">
-        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
-          
-          <div class="form-row">
-            <div class="form-group full-width">
-              <label>Račun pošiljaoca</label>
-              <select formControlName="senderAccount" class="form-control" [class.is-invalid]="paymentForm.get('senderAccount')?.invalid && paymentForm.get('senderAccount')?.touched">
-                <option *ngFor="let acc of myAccounts" [value]="acc.accountNumber">
-                  {{ acc.name }} ({{ maskAccountNumber(acc.accountNumber) }}) - Raspoloživo: {{ formatAmount(acc.availableBalance) }} {{ acc.currency }}
-                </option>
-              </select>
-            </div>
+    <div class="z-card p-6" *ngIf="!isLoading">
+
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" *ngIf="!transactionSuccess" class="space-y-5">
+
+        <div>
+          <label class="z-label">Račun pošiljaoca</label>
+          <select formControlName="senderAccount" class="z-select"
+                  [class.border-red-400]="paymentForm.get('senderAccount')?.invalid && paymentForm.get('senderAccount')?.touched">
+            <option *ngFor="let acc of myAccounts" [value]="acc.accountNumber">
+              {{ acc.name }} ({{ maskAccountNumber(acc.accountNumber) }}) - Raspoloživo: {{ formatAmount(acc.availableBalance) }} {{ acc.currency }}
+            </option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="z-label">Primalac (Ime ili Naziv)</label>
+            <input type="text" formControlName="receiverName" class="z-input" placeholder="Unesite ime primaoca"
+                   [class.border-red-400]="paymentForm.get('receiverName')?.invalid && paymentForm.get('receiverName')?.touched" />
+            <p class="z-error" *ngIf="paymentForm.get('receiverName')?.invalid && paymentForm.get('receiverName')?.touched">Ime primaoca je obavezno.</p>
           </div>
-
-          <div class="form-row">
-            <div class="form-group half-width">
-              <label>Ime primaoca</label>
-              <input type="text" formControlName="receiverName" class="form-control" placeholder="Ime i prezime ili naziv firme" [class.is-invalid]="paymentForm.get('receiverName')?.invalid && paymentForm.get('receiverName')?.touched">
-              <span class="error-msg" *ngIf="paymentForm.get('receiverName')?.invalid && paymentForm.get('receiverName')?.touched">Ime primaoca je obavezno.</span>
-            </div>
-
-            <div class="form-group half-width">
-              <label>Račun primaoca</label>
-              <input type="text" formControlName="receiverAccount" class="form-control" placeholder="18 cifara, bez razmaka i crtica" [class.is-invalid]="paymentForm.get('receiverAccount')?.invalid && paymentForm.get('receiverAccount')?.touched">
-              <span class="error-msg" *ngIf="paymentForm.get('receiverAccount')?.errors?.['required'] && paymentForm.get('receiverAccount')?.touched">Račun primaoca je obavezan.</span>
-              <span class="error-msg" *ngIf="paymentForm.get('receiverAccount')?.errors?.['pattern'] && paymentForm.get('receiverAccount')?.touched">Račun mora imati tačno 18 cifara.</span>
-            </div>
+          <div>
+            <label class="z-label">Račun primaoca</label>
+            <input type="text" formControlName="receiverAccount" class="z-input" placeholder="Npr. 2650000001234567890"
+                   [class.border-red-400]="paymentForm.get('receiverAccount')?.invalid && paymentForm.get('receiverAccount')?.touched" />
+            <p class="z-error" *ngIf="paymentForm.get('receiverAccount')?.invalid && paymentForm.get('receiverAccount')?.touched">Unesite ispravan broj računa (19 cifara).</p>
           </div>
+        </div>
 
-          <div class="form-row">
-            <div class="form-group half-width">
-              <label>Iznos</label>
-              <div class="input-with-currency">
-                <input type="number" formControlName="amount" class="form-control" placeholder="0.00" [class.is-invalid]="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched">
-                <span class="currency-badge">RSD</span>
-              </div>
-              <span class="error-msg" *ngIf="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched">Unesite validan iznos.</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="z-label">Iznos</label>
+            <div class="relative">
+              <input type="number" formControlName="amount" class="z-input pr-16" placeholder="0.00"
+                     [class.border-red-400]="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched" />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded">RSD</span>
             </div>
-
-            <div class="form-group half-width">
-              <label>Šifra plaćanja</label>
-              <select formControlName="paymentCode" class="form-control" [class.is-invalid]="paymentForm.get('paymentCode')?.invalid && paymentForm.get('paymentCode')?.touched">
-                <option value="220">220 - Promet robe i usluga</option>
-                <option value="221">221 - Promet usluga</option>
-                <option value="222">222 - Usluge javnih preduzeća</option>
-                <option value="240">240 - Zarade i druga primanja zaposlenih</option>
-                <option value="241">241 - Neoporeziva primanja zaposlenih</option>
-                <option value="253">253 - Uplata javnih prihoda (porezi)</option>
-                <option value="289">289 - Transakcije po nalogu građana</option>
-                <option value="290">290 - Druge transakcije</option>
-              </select>
-              <span class="error-msg" *ngIf="paymentForm.get('paymentCode')?.invalid && paymentForm.get('paymentCode')?.touched">Izaberite šifru plaćanja.</span>
-            </div>
+            <p class="z-error" *ngIf="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched">Unesite validan iznos veći od 0.</p>
           </div>
-
-          <div class="form-row">
-            <div class="form-group half-width">
-              <label>Svrha plaćanja</label>
-              <input type="text" formControlName="purpose" class="form-control" placeholder="Npr. Uplata za račun..." [class.is-invalid]="paymentForm.get('purpose')?.invalid && paymentForm.get('purpose')?.touched">
-              <span class="error-msg" *ngIf="paymentForm.get('purpose')?.invalid && paymentForm.get('purpose')?.touched">Svrha plaćanja je obavezna.</span>
-            </div>
-
-            <div class="form-group half-width">
-              <label>Poziv na broj (Opciono)</label>
-              <input type="text" formControlName="referenceNumber" class="form-control" placeholder="Npr. 97-123456" [class.is-invalid]="paymentForm.get('referenceNumber')?.invalid && paymentForm.get('referenceNumber')?.touched">
-              <span class="error-msg" *ngIf="paymentForm.get('referenceNumber')?.invalid && paymentForm.get('referenceNumber')?.touched">Dozvoljeni su samo brojevi i crtice.</span>
-            </div>
+          <div>
+            <label class="z-label">Šifra plaćanja</label>
+            <select formControlName="paymentCode" class="z-select"
+                    [class.border-red-400]="paymentForm.get('paymentCode')?.invalid && paymentForm.get('paymentCode')?.touched">
+              <option value="220">220 - Promet robe i usluga</option>
+              <option value="221">221 - Promet usluga</option>
+              <option value="222">222 - Usluge javnih preduzeća</option>
+              <option value="240">240 - Zarade i druga primanja zaposlenih</option>
+              <option value="241">241 - Neoporeziva primanja zaposlenih</option>
+              <option value="253">253 - Uplata javnih prihoda (porezi)</option>
+              <option value="289">289 - Transakcije po nalogu građana</option>
+              <option value="290">290 - Druge transakcije</option>
+            </select>
+            <p class="z-error" *ngIf="paymentForm.get('paymentCode')?.invalid && paymentForm.get('paymentCode')?.touched">Izaberite šifru plaćanja.</p>
           </div>
+        </div>
 
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" (click)="onCancel()">Nazad na listu</button>
-            <button type="submit" class="btn-submit" [disabled]="paymentForm.invalid">POTVRDI PLAĆANJE &rsaquo;</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="z-label">Svrha plaćanja</label>
+            <input type="text" formControlName="purpose" class="z-input" placeholder="Npr. Uplata za račun..."
+                   [class.border-red-400]="paymentForm.get('purpose')?.invalid && paymentForm.get('purpose')?.touched" />
+            <p class="z-error" *ngIf="paymentForm.get('purpose')?.invalid && paymentForm.get('purpose')?.touched">Svrha plaćanja je obavezna.</p>
           </div>
+          <div>
+            <label class="z-label">Poziv na broj (Opciono)</label>
+            <input type="text" formControlName="referenceNumber" class="z-input" placeholder="Npr. 97-123456"
+                   [class.border-red-400]="paymentForm.get('referenceNumber')?.invalid && paymentForm.get('referenceNumber')?.touched" />
+            <p class="z-error" *ngIf="paymentForm.get('referenceNumber')?.invalid && paymentForm.get('referenceNumber')?.touched">Dozvoljeni su samo brojevi i crtice.</p>
+          </div>
+        </div>
 
-        </form>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" class="z-btn-outline" (click)="onCancel()">Nazad na listu</button>
+          <button type="submit" class="z-btn-primary" [disabled]="paymentForm.invalid">POTVRDI PLAĆANJE &rsaquo;</button>
+        </div>
+      </form>
+
+      <!-- Success state -->
+      <div *ngIf="transactionSuccess" class="text-center py-8 space-y-6">
+        <div class="w-20 h-20 mx-auto rounded-full bg-green-100 flex items-center justify-center animate-[scale-in_0.3s_ease-out]">
+          <svg class="w-10 h-10 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <div *ngIf="isNewRecipient" class="z-card p-4 max-w-md mx-auto">
+          <p class="text-sm text-muted-foreground mb-3">Ovaj primalac nije u vašoj listi sačuvanih plaćanja. Želite li da ga dodate?</p>
+          <button type="button" class="z-btn-outline z-btn-sm z-btn-full" (click)="saveToRecipients()" [disabled]="isSavingRecipient">
+            {{ isSavingRecipient ? 'Čuvanje...' : '+ DODAJ U LISTU PRIMALACA' }}
+          </button>
+        </div>
+
+        <div *ngIf="recipientSaved" class="flex items-center justify-center gap-2 text-green-600 text-sm font-medium">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Primalac je uspešno sačuvan u vašoj listi!
+        </div>
+
+        <button type="button" class="z-btn-primary" (click)="onCancel()">NAZAD NA LISTU RAČUNA</button>
       </div>
     </div>
-  </main>
+  </div>
 </div>
+
+<app-verification-modal
+  *ngIf="showVerificationModal"
+  operationType="PAYMENT"
+  [relatedEntityId]="paymentForm.value.senderAccount"
+  (confirmed)="handleVerification($event)"
+  (closed)="showVerificationModal = false">
+</app-verification-modal>

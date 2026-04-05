@@ -24,7 +24,7 @@ describe('Employee List Component', () => {
     // Set auth token to bypass guard
     window.localStorage.setItem('authToken', 'fake-jwt-token');
     window.localStorage.setItem('loggedUser', JSON.stringify({
-      email: 'admin@test.com', role: 'EmployeeAdmin', permissions: []
+      email: 'admin@test.com', role: 'EmployeeAdmin', permissions: ['EMPLOYEE_MANAGE_ALL']
     }));
 
     cy.visit('/employees');
@@ -37,12 +37,12 @@ describe('Employee List Component', () => {
   });
 
   it('treba da prikaže status badge za svakog zaposlenog', () => {
-    cy.get('table tbody tr').first().find('.badge-success').should('contain', 'Active');
-    cy.get('table tbody tr').last().find('.badge-danger').should('contain', 'Inactive');
+    cy.get('table tbody tr').first().find('.z-badge-green').should('contain', 'Aktivan');
+    cy.get('table tbody tr').last().find('.z-badge-red').should('contain', 'Neaktivan');
   });
 
   it('treba da prikaže role badge', () => {
-    cy.get('table tbody tr').first().find('.badge-role').should('contain', 'EmployeeBasic');
+    cy.get('table tbody tr').first().find('.z-badge-gray').should('contain', 'EmployeeBasic');
   });
 
   it('treba da izvrši pretragu kada se ukuca u search input', () => {
@@ -55,7 +55,7 @@ describe('Employee List Component', () => {
       }
     }).as('searchEmployees');
 
-    cy.get('.search-input').type('jelena');
+    cy.get('input[placeholder="Pretražite po imenu, emailu, poziciji..."]').type('jelena');
 
     // Wait for debounce (350ms) + API call
     cy.wait('@searchEmployees');
@@ -64,16 +64,16 @@ describe('Employee List Component', () => {
   });
 
   it('treba da preusmeri na formu za kreiranje kada se klikne na "Add employee"', () => {
-    cy.get('.btn-primary').contains('Add employee').click();
+    cy.get('.z-btn-primary').contains('Dodaj zaposlenog').click();
     cy.url().should('include', '/employees/new');
   });
 
   it('treba da sakrije delete dugme za admin korisnike', () => {
     // Marko is EmployeeBasic - should have delete button
-    cy.get('table tbody tr').first().find('.btn-icon-danger').should('exist');
+    cy.get('table tbody tr').first().find('button[title="Deaktiviraj"]').should('exist');
 
     // Jelena is EmployeeAdmin - should NOT have delete button
-    cy.get('table tbody tr').last().find('.btn-icon-danger').should('not.exist');
+    cy.get('table tbody tr').last().find('button[title="Deaktiviraj"]').should('not.exist');
   });
 
   it('treba da obriše zaposlenog kada se klikne na delete dugme', () => {
@@ -94,21 +94,20 @@ describe('Employee List Component', () => {
       });
     }).as('getEmployeesAfterDelete');
 
-    cy.get('table tbody tr').first().find('.btn-icon-danger').click();
+    cy.get('table tbody tr').first().find('button[title="Deaktiviraj"]').click();
 
     cy.wait('@deleteEmployee');
     cy.wait('@getEmployeesAfterDelete');
   });
 
   it('treba da otvori edit modal kada se klikne na edit dugme', () => {
-    cy.get('table tbody tr').first().find('.btn-icon').first().click();
+    cy.get('table tbody tr').first().find('button[title="Izmeni"]').first().click();
     cy.get('app-employee-edit-modal').should('exist');
-    cy.get('.modal-overlay').should('be.visible');
   });
 
   it('treba da prikaže pagination info', () => {
-    cy.get('.pagination').should('exist');
-    cy.get('.pagination-range').should('contain', 'of 2');
+    cy.contains('Redova po stranici:').should('exist');
+    cy.contains('of 2').should('exist');
   });
 
 });

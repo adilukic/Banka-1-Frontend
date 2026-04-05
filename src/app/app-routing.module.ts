@@ -15,6 +15,11 @@ import { NotFoundComponent } from './shared/components/not-found/not-found.compo
 import { ForbiddenComponent } from './shared/components/forbidden/forbidden.component';
 import { NewPaymentComponent } from './features/client/components/new-payment/new-payment.component';
 import { ExchangeListComponent } from './features/employee/components/exchange-list/exchange-list.component';
+import { AccountManagementComponent } from './features/employee/account-management/account-management.component';
+import { AccountCardsPlaceholderComponent } from './features/employee/account-cards-placeholder/account-cards-placeholder.component';
+import { ActuaryManagementComponent } from './features/employee/components/actuary-management/actuary-management.component';
+import { PaymentRecipientsComponent } from './features/client/components/payment-recipients/payment-recipients.component';
+import { PaymentHistoryComponent } from './features/client/components/payment-history/payment-history.component';
 
 const routes: Routes = [
   {
@@ -38,14 +43,14 @@ const routes: Routes = [
   {
     path: 'clients',
     component: ClientListComponent,
-    canActivate: [authGuard, roleGuard], 
+    canActivate: [authGuard, roleGuard],
     data: { permission: 'CLIENT_MANAGE' }
   },
   {
     path: 'clients/:id',
     component: ClientDetailComponent,
     canActivate: [authGuard, roleGuard],
-    data: { permission: 'CLIENT_MANAGE' } 
+    data: { permission: 'CLIENT_MANAGE' }
   },
   {
     path: 'users',
@@ -67,13 +72,31 @@ const routes: Routes = [
     component: AccountListComponent,
     canActivate: [authGuard],
   },
-  
+  {
+  path: 'account-management',
+  component: AccountManagementComponent,
+  canActivate: [authGuard, roleGuard],
+  data: { permission: 'CLIENT_MANAGE' }
+},
+{
+  path: 'account-cards',
+  component: AccountCardsPlaceholderComponent,
+  canActivate: [authGuard, roleGuard],
+  data: { permission: 'CLIENT_MANAGE' }
+},
+{
+  path: 'actuary-management',
+  component: ActuaryManagementComponent,
+  canActivate: [authGuard, roleGuard],
+  data: { permission: 'FUND_AGENT_MANAGE' }
+},
+
   {
   path: 'transfers/different',
   component: TransferDiffComponent,
   canActivate: [authGuard]
   },
-    
+
   {
   path: 'transfers/same',
   component: TransferSameComponent,
@@ -86,6 +109,7 @@ const routes: Routes = [
   data: { permission: 'EMPLOYEE_MANAGE_ALL' }
 },
     
+
   {
     path: '403',
     component: ForbiddenComponent
@@ -94,6 +118,16 @@ const routes: Routes = [
     path: '',
     loadChildren: () =>
       import('./features/auth/auth.module').then((m) => m.AuthModule)
+  },
+  {
+    path: 'payments/recipients',
+    component: PaymentRecipientsComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payments',
+    component: PaymentHistoryComponent,
+    canActivate: [authGuard]
   },
   {
     path: '**',

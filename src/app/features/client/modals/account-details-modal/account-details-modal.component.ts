@@ -1,8 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Account } from '../../models/account.model';
 import { RenameAccountComponent } from '../../components/rename-account/rename-account.component';
 import { ChangeLimitModalComponent } from '../change-limit-modal/change-limit-modal.component';
+import { AccountService } from '../../services/account.service';
 @Component({
   selector: 'app-account-details-modal',
   templateUrl: './account-details-modal.component.html',
@@ -10,7 +12,7 @@ import { ChangeLimitModalComponent } from '../change-limit-modal/change-limit-mo
   imports: [CommonModule, RenameAccountComponent, ChangeLimitModalComponent],
   styleUrls: ['./account-details-modal.component.scss']
 })
-export class AccountDetailsModalComponent {
+export class AccountDetailsModalComponent implements OnInit {
   @Input() public account: Account | null = null;
   @Input() public allAccounts: Account[] = [];
   @Output() public close = new EventEmitter<void>();
@@ -21,6 +23,19 @@ export class AccountDetailsModalComponent {
     }
 
     return ['DOO', 'AD', 'FOUNDATION', 'FOREIGN_BUSINESS'].includes(this.account.subtype);
+  }
+
+  constructor(private router: Router, private readonly accountService: AccountService) {}
+
+  public ngOnInit(): void {
+    if (this.account?.accountNumber) {
+      this.accountService.getAccountByNumber(this.account.accountNumber).subscribe({
+        next: (fullAccount) => {
+          this.account = { ...fullAccount, name: fullAccount.name || this.account!.name };
+        },
+        error: (err) => console.error('Failed to load account details', err)
+      });
+    }
   }
 
   public getModalSubtitle(): string {
@@ -50,9 +65,10 @@ export class AccountDetailsModalComponent {
     this.showRenameModal = false;
   }
 
-  // TODO: navigate na stranicu za novo placanje (sledeci sprint)
+  // Navigate to new payment page
   public onNewPayment(): void {
-    console.log('Open new payment flow');
+    this.closeModal();
+    this.router.navigate(['/accounts/payment/new']);
   }
 
   public isChangeLimitModalOpen = false;

@@ -4,17 +4,18 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 import { Account } from '../../models/account.model';
 import { AccountService } from '../../services/account.service';
-import { TransferService, TransferPreview } from '../../services/transfer.service';
+import { TransferService, TransferResponse } from '../../services/transfer.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
+import { VerificationModalComponent } from '../../modals/verification-modal/verification-modal.component';
 
 type Step = 'form' | 'confirm' | 'success';
 
 @Component({
   selector: 'app-transfer-diff',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, VerificationModalComponent],
   templateUrl: './transfer-diff.component.html',
   styleUrls: ['./transfer-diff.component.scss']
 })
@@ -22,15 +23,15 @@ export class TransferDiffComponent implements OnInit {
   accounts: Account[] = [];
   filteredToAccounts: Account[] = [];
   transferForm!: FormGroup;
+  public showVerificationModal = false;
 
   step: Step = 'form';
   isLoading = true;
   isSubmitting = false;
-  isPreviewLoading = false;
 
   selectedFromAccount: Account | null = null;
   selectedToAccount: Account | null = null;
-  preview: TransferPreview | null = null;
+  transferResult: TransferResponse | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -47,8 +48,8 @@ export class TransferDiffComponent implements OnInit {
 
   ngOnInit(): void {
     this.transferForm = this.fb.group({
-      fromAccountId: [null, Validators.required],
-      toAccountId: [null, Validators.required],
+      fromAccountNumber: [null, Validators.required],
+      toAccountNumber: [null, Validators.required],
       amount: [null, [Validators.required, Validators.min(0.01)]]
     });
 
@@ -65,15 +66,15 @@ export class TransferDiffComponent implements OnInit {
   }
 
   onFromAccountChange(): void {
-    const fromId = this.transferForm.get('fromAccountId')?.value;
-    this.selectedFromAccount = this.accounts.find(a => a.id === +fromId) || null;
+    const fromNumber = this.transferForm.get('fromAccountNumber')?.value;
+    this.selectedFromAccount = this.accounts.find(a => a.accountNumber === fromNumber) || null;
 
-    this.transferForm.patchValue({ toAccountId: null });
+    this.transferForm.patchValue({ toAccountNumber: null });
     this.selectedToAccount = null;
 
     if (this.selectedFromAccount) {
       this.filteredToAccounts = this.accounts.filter(
-        a => a.id !== this.selectedFromAccount!.id && a.currency !== this.selectedFromAccount!.currency
+        a => a.accountNumber !== this.selectedFromAccount!.accountNumber && a.currency !== this.selectedFromAccount!.currency
       );
     } else {
       this.filteredToAccounts = [];
@@ -81,8 +82,8 @@ export class TransferDiffComponent implements OnInit {
   }
 
   onToAccountChange(): void {
-    const toId = this.transferForm.get('toAccountId')?.value;
-    this.selectedToAccount = this.accounts.find(a => a.id === +toId) || null;
+    const toNumber = this.transferForm.get('toAccountNumber')?.value;
+    this.selectedToAccount = this.accounts.find(a => a.accountNumber === toNumber) || null;
   }
 
   get amountError(): string {
@@ -107,44 +108,36 @@ export class TransferDiffComponent implements OnInit {
       return;
     }
 
-    this.isPreviewLoading = true;
-
-    const payload = {
-      fromAccountId: +this.transferForm.value.fromAccountId,
-      toAccountId: +this.transferForm.value.toAccountId,
-      amount: this.transferForm.value.amount
-    };
-
-    this.transferService.previewTransfer(payload).subscribe({
-      next: (preview) => {
-        this.preview = preview;
-        this.isPreviewLoading = false;
-        this.step = 'confirm';
-      },
-      error: () => {
-        this.isPreviewLoading = false;
-        this.toastService.error('Greška prilikom pregleda transfera.');
-      }
-    });
+    this.step = 'confirm';
   }
 
   onBack(): void {
     this.step = 'form';
-    this.preview = null;
   }
 
   onConfirm(): void {
+    this.showVerificationModal = true;
+  }
+
+  handleVerification(sessionId: number): void {
+    this.showVerificationModal = false;
+    this.executeTransfer(sessionId);
+  }
+
+  private executeTransfer(verificationSessionId: number): void {
     this.isSubmitting = true;
 
     const payload = {
-      fromAccountId: +this.transferForm.value.fromAccountId,
-      toAccountId: +this.transferForm.value.toAccountId,
-      amount: this.transferForm.value.amount
+      fromAccountNumber: this.transferForm.value.fromAccountNumber,
+      toAccountNumber: this.transferForm.value.toAccountNumber,
+      amount: this.transferForm.value.amount,
+      verificationSessionId
     };
 
-    this.transferService.transferDifferentCurrency(payload).subscribe({
-      next: () => {
+    this.transferService.transfer(payload).subscribe({
+      next: (result) => {
         this.isSubmitting = false;
+        this.transferResult = result;
         this.step = 'success';
         this.toastService.success('Transfer je uspešno izvršen!');
       },
@@ -162,7 +155,7 @@ export class TransferDiffComponent implements OnInit {
     this.selectedFromAccount = null;
     this.selectedToAccount = null;
     this.filteredToAccounts = [];
-    this.preview = null;
+    this.transferResult = null;
   }
 
   formatCurrency(amount: number, currency: string): string {

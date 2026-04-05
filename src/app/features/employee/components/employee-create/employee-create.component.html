@@ -1,93 +1,102 @@
-<div class="create-page">
-  <!-- Hero header with gradient -->
-  <div class="create-hero">
-    <div class="hero-content">
-      <button type="button" class="back-link" routerLink="/employees">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Back to employees
-      </button>
+<app-navbar />
 
-      <div class="page-title">
-        <h1>Create employee</h1>
-        <p>Fill in the details to create a new employee account. They will receive an activation email.</p>
-      </div>
+<div class="page-layout">
+  <div class="page-content">
+    <!-- Back link -->
+    <button type="button" routerLink="/employees"
+            class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-4">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Nazad na zaposlene
+    </button>
+
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-foreground">Kreiraj zaposlenog</h1>
+      <p class="text-sm text-muted-foreground mt-1">Popunite podatke za kreiranje novog naloga zaposlenog. Dobiće aktivacioni email.</p>
     </div>
-  </div>
 
-  <div class="create-content">
-    <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" novalidate>
+    <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
       <!-- Personal info -->
-      <div class="form-card">
-        <h2 class="card-title">Personal information</h2>
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="ime">First name <span class="required">*</span></label>
-            <input id="ime" type="text" formControlName="ime" placeholder="Enter first name" />
-            <p class="field-error" *ngIf="employeeForm.get('ime')?.touched && employeeForm.get('ime')?.invalid">
-              First name is required (min 2 characters).
+      <div class="z-card p-6">
+        <h2 class="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+          <span class="w-1 h-5 bg-primary rounded-full"></span>
+          Lični podaci
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="ime" class="z-label">Ime <span class="text-red-500">*</span></label>
+            <input id="ime" type="text" formControlName="ime" placeholder="Unesite ime" class="z-input" />
+            <p class="z-error" *ngIf="employeeForm.get('ime')?.touched && employeeForm.get('ime')?.invalid">
+              Ime je obavezno (min 2 karaktera).
             </p>
           </div>
-          <div class="form-field">
-            <label for="prezime">Last name <span class="required">*</span></label>
-            <input id="prezime" type="text" formControlName="prezime" placeholder="Enter last name" />
-            <p class="field-error" *ngIf="employeeForm.get('prezime')?.touched && employeeForm.get('prezime')?.invalid">
-              Last name is required (min 2 characters).
+          <div>
+            <label for="prezime" class="z-label">Prezime <span class="text-red-500">*</span></label>
+            <input id="prezime" type="text" formControlName="prezime" placeholder="Unesite prezime" class="z-input" />
+            <p class="z-error" *ngIf="employeeForm.get('prezime')?.touched && employeeForm.get('prezime')?.invalid">
+              Prezime je obavezno (min 2 karaktera).
             </p>
           </div>
-          <div class="form-field">
-            <label for="datumRodjenja">Date of birth <span class="required">*</span></label>
-            <input id="datumRodjenja" type="date" formControlName="datumRodjenja" />
+          <div>
+            <label for="datumRodjenja" class="z-label">Datum rođenja <span class="text-red-500">*</span></label>
+            <input id="datumRodjenja" type="date" formControlName="datumRodjenja" class="z-input" />
           </div>
-          <div class="form-field">
-            <label for="pol">Gender <span class="required">*</span></label>
-            <select id="pol" formControlName="pol">
-              <option value="M">Male</option>
-              <option value="Z">Female</option>
+          <div>
+            <label for="pol" class="z-label">Pol <span class="text-red-500">*</span></label>
+            <select id="pol" formControlName="pol" class="z-select">
+              <option value="M">Muški</option>
+              <option value="Z">Ženski</option>
             </select>
           </div>
         </div>
       </div>
 
       <!-- Contact info -->
-      <div class="form-card">
-        <h2 class="card-title">Contact information</h2>
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="email">Email <span class="required">*</span></label>
-            <input id="email" type="email" formControlName="email" placeholder="Enter email address" />
-            <p class="field-error" *ngIf="employeeForm.get('email')?.touched && employeeForm.get('email')?.invalid">
-              Valid email is required.
+      <div class="z-card p-6">
+        <h2 class="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+          <span class="w-1 h-5 bg-primary rounded-full"></span>
+          Kontakt informacije
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="email" class="z-label">Email <span class="text-red-500">*</span></label>
+            <input id="email" type="email" formControlName="email" placeholder="Unesite email adresu" class="z-input" />
+            <p class="z-error" *ngIf="employeeForm.get('email')?.touched && employeeForm.get('email')?.invalid">
+              Validan email je obavezan.
             </p>
           </div>
-          <div class="form-field">
-            <label for="brojTelefona">Phone number <span class="required">*</span></label>
-            <input id="brojTelefona" type="text" formControlName="brojTelefona" placeholder="+381..." />
+          <div>
+            <label for="brojTelefona" class="z-label">Broj telefona <span class="text-red-500">*</span></label>
+            <input id="brojTelefona" type="text" formControlName="brojTelefona" placeholder="+381..." class="z-input" />
           </div>
-          <div class="form-field full-width">
-            <label for="adresa">Address</label>
-            <input id="adresa" type="text" formControlName="adresa" placeholder="Enter address" />
+          <div class="md:col-span-2">
+            <label for="adresa" class="z-label">Adresa</label>
+            <input id="adresa" type="text" formControlName="adresa" placeholder="Unesite adresu" class="z-input" />
           </div>
         </div>
       </div>
 
       <!-- Job info -->
-      <div class="form-card">
-        <h2 class="card-title">Job details</h2>
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="pozicija">Position <span class="required">*</span></label>
-            <input id="pozicija" type="text" formControlName="pozicija" placeholder="e.g. Software Developer" />
+      <div class="z-card p-6">
+        <h2 class="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+          <span class="w-1 h-5 bg-primary rounded-full"></span>
+          Detalji posla
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="pozicija" class="z-label">Pozicija <span class="text-red-500">*</span></label>
+            <input id="pozicija" type="text" formControlName="pozicija" placeholder="npr. Software Developer" class="z-input" />
           </div>
-          <div class="form-field">
-            <label for="departman">Department <span class="required">*</span></label>
-            <input id="departman" type="text" formControlName="departman" placeholder="e.g. IT" />
+          <div>
+            <label for="departman" class="z-label">Odeljenje <span class="text-red-500">*</span></label>
+            <input id="departman" type="text" formControlName="departman" placeholder="npr. IT" class="z-input" />
           </div>
-          <div class="form-field">
-            <label for="role">Role <span class="required">*</span></label>
-            <select id="role" formControlName="role">
+          <div>
+            <label for="role" class="z-label">Uloga <span class="text-red-500">*</span></label>
+            <select id="role" formControlName="role" class="z-select">
               <option value="BASIC">Basic</option>
               <option value="AGENT">Agent</option>
               <option value="SUPERVISOR">Supervisor</option>
@@ -98,23 +107,23 @@
       </div>
 
       <!-- Info notice -->
-      <div class="info-notice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="flex items-start gap-3 px-4 py-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">
+        <svg class="w-5 h-5 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="16" x2="12" y2="12"></line>
           <line x1="12" y1="8" x2="12.01" y2="8"></line>
         </svg>
-        <span>The employee will receive an activation email. They will become active after clicking the link and setting their password.</span>
+        <span>Zaposleni će dobiti aktivacioni email. Postaje aktivan nakon klika na link i postavljanja lozinke.</span>
       </div>
 
       <!-- Form actions -->
-      <div class="form-actions">
-        <button type="button" class="btn-outline" routerLink="/employees">Cancel</button>
-        <button type="submit" class="btn-primary" [disabled]="isLoading || employeeForm.invalid">
-          <svg *ngIf="isLoading" class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" class="z-btn-outline" routerLink="/employees">Otkaži</button>
+        <button type="submit" class="z-btn-primary flex items-center gap-2" [disabled]="isLoading || employeeForm.invalid">
+          <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
           </svg>
-          {{ isLoading ? 'Creating...' : 'Create employee' }}
+          {{ isLoading ? 'Kreiranje...' : 'Kreiraj zaposlenog' }}
         </button>
       </div>
     </form>

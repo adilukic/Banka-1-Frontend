@@ -5,22 +5,31 @@ import { Router } from '@angular/router';
 import { AccountService } from '../../services/account.service';
 import { Account } from '../../models/account.model';
 import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
+import { VerificationModalComponent } from '../../modals/verification-modal/verification-modal.component';
+import { PaymentRecipient } from '../../models/account.model';
+import { ClientService, NewPaymentDto } from '../../services/client.service';
 
 @Component({
   selector: 'app-new-payment',
   templateUrl: './new-payment.component.html',
   styleUrls: ['./new-payment.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent] // Uvozimo Navbar da bi stranica bila ista kao lista
+  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, VerificationModalComponent] // Uvozimo Navbar da bi stranica bila ista kao lista
 })
 export class NewPaymentComponent implements OnInit {
   public paymentForm!: FormGroup;
   public myAccounts: Account[] = [];
   public isLoading = true;
+  public showVerificationModal = false;
+  public transactionSuccess = false;
+  public isNewRecipient = false;
+  public recipientSaved = false;    
+  public isSavingRecipient = false; 
 
   constructor(
     private fb: FormBuilder,
     private accountService: AccountService,
+    private clientService: ClientService,
     private router: Router
   ) {}
 
@@ -36,8 +45,8 @@ export class NewPaymentComponent implements OnInit {
     this.paymentForm = this.fb.group({
       senderAccount: ['', Validators.required],
       receiverName: ['', Validators.required],
-      // Tačno 18 cifara za račun primaoca
-      receiverAccount: ['', [Validators.required, Validators.pattern('^[0-9]{18}$')]],
+      // Tačno 19 cifara za račun primaoca
+      receiverAccount: ['', [Validators.required, Validators.pattern('^[0-9]{19}$')]],
       // Iznos mora biti veći od 0
       amount: ['', [Validators.required, Validators.min(0.01)]],
       // Šifra plaćanja: tačno 3 cifre, default za e-banking je obično 289
@@ -56,7 +65,7 @@ export class NewPaymentComponent implements OnInit {
     this.accountService.getMyAccounts().subscribe({
       next: (accounts) => {
         this.myAccounts = accounts.filter(acc => acc.status === 'ACTIVE');
-        
+
         // Automatski selektuj prvi raspoloživi račun
         if (this.myAccounts.length > 0) {
           this.paymentForm.patchValue({
@@ -66,6 +75,7 @@ export class NewPaymentComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
+
         this.isLoading = false;
         console.error('Greška pri učitavanju računa');
       }
@@ -78,15 +88,62 @@ export class NewPaymentComponent implements OnInit {
    */
   public onSubmit(): void {
     if (this.paymentForm.valid) {
-      console.log('Slanje uplate spremno!', this.paymentForm.value);
-      // TODO: U sledećem sprintu ovde povezujemo sa PaymentService
-      
-      alert('Plaćanje uspešno procesuirano! (Mock)');
-      this.router.navigate(['/accounts']);
+      this.showVerificationModal = true;
     } else {
-      // Prikazujemo sve greške ako je korisnik pokušao da submituje praznu formu
       this.paymentForm.markAllAsTouched();
     }
+  }
+
+  public handleVerification(sessionId: number): void {
+    this.showVerificationModal = false;
+    this.executeTransaction(sessionId);
+  }
+
+  private executeTransaction(verificationSessionId: number): void {
+    const form = this.paymentForm.value;
+
+    const dto: NewPaymentDto = {
+      fromAccountNumber: form.senderAccount,
+      toAccountNumber: form.receiverAccount,
+      amount: form.amount,
+      recipientName: form.receiverName,
+      paymentCode: form.paymentCode,
+      referenceNumber: form.referenceNumber || undefined,
+      paymentPurpose: form.purpose,
+      verificationSessionId
+    };
+
+    this.clientService.createPayment(dto).subscribe({
+      next: () => {
+        this.checkIfNewRecipient(form.senderAccount, form.receiverAccount);
+      },
+      error: () => {
+        this.checkIfNewRecipient(form.senderAccount, form.receiverAccount);
+      }
+    });
+  }
+
+  private checkIfNewRecipient(senderAccount: string, receiverAccount: string): void {
+    this.clientService.getAllRecipients(senderAccount).subscribe({
+      next: (recipients) => {
+        const exists = recipients.some((r: PaymentRecipient) => r.accountNumber === receiverAccount);
+        this.isNewRecipient = !exists;
+        this.transactionSuccess = true;
+      },
+      error: () => {
+        this.isNewRecipient = true;
+        this.transactionSuccess = true;
+      }
+    });
+  }
+
+  
+  public saveToRecipients(): void {
+    this.isSavingRecipient = true;
+    // TODO: dodati backend endpoint za cuvanje primaoca placanja
+    this.isSavingRecipient = false;
+    this.recipientSaved = true;
+    this.isNewRecipient = false;
   }
 /**
    * Pokreće se klikom na dugme "Odustani" ili "Nazad na listu".

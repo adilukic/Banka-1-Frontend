@@ -1,5 +1,5 @@
 describe('AccountCreate', () => {
-  const route = 'http://localhost:4200/employees/accounts/new';
+  const route = 'http://localhost:4200/accounts/new';
 
   function makeFakeJwt(win: Window): string {
     const header = { alg: 'HS256', typ: 'JWT' };
@@ -30,17 +30,33 @@ describe('AccountCreate', () => {
   }
 
   beforeEach(() => {
+    // Intercept client loading so the HTTP request completes and doesn't leave the UI spinning or uninitialized causing disabled fields
+    cy.intercept('GET', '**/clients/customers*', {
+      statusCode: 200,
+      body: {
+        content: [
+          { id: 1, ime: 'Petar', prezime: 'Petrović' },
+          { id: 2, ime: 'Marko', prezime: 'Marković' }
+        ],
+        totalElements: 2,
+        totalPages: 1,
+        number: 0,
+        size: 100
+      }
+    }).as('getClients');
+
     cy.visit(route, {
       onBeforeLoad(win) {
         loginWithClientManage(win);
       },
     });
 
+    cy.wait('@getClients');
     cy.contains('Korak 1 - Tip računa', { timeout: 10000 }).should('be.visible');
   });
 
   it('DEVIZNI flow sa EUR i poslovnim vlasnikom uspešno šalje formu', () => {
-    cy.intercept('POST', '**/accounts*', (req) => {
+    cy.intercept('POST', '**/employee/accounts/fx*', (req) => {
       req.reply({
         statusCode: 201,
         body: {
@@ -86,39 +102,33 @@ describe('AccountCreate', () => {
     cy.contains('Podaci o firmi').should('be.visible');
 
     cy.get('input[formControlName="companyName"]').type('Devizna Firma');
-    cy.get('input[formControlName="companyNumber"]').type('54321');
-    cy.get('input[formControlName="companyTaxId"]').type('9999');
+    // exact digits validation: 8 digits for matični broj, 9 digits for poreski
+    cy.get('input[formControlName="companyNumber"]').type('12345678');
+    cy.get('input[formControlName="companyTaxId"]').type('123456789');
     cy.get('input[formControlName="companyActivityCode"]').type('777');
     cy.get('input[formControlName="companyAddress"]').type('Beograd 2');
 
     cy.contains('button', 'Kreiraj račun').should('be.enabled').click();
 
     cy.wait('@createAccount').its('request.body').should((body) => {
-      expect(body.kind).to.exist;
-      expect(body.currency).to.equal('EUR');
+      // API expects currencyCode and tipRacuna on DTO for FX accounts according to interface
+      expect(body.currencyCode).to.equal('EUR');
       expect(body.initialBalance).to.equal(2500);
 
-      expect(body.company).to.deep.equal({
-        name: 'Devizna Firma',
-        registrationNumber: '54321',
-        taxId: '9999',
-        activityCode: '777',
-        address: 'Beograd 2',
+      expect(body.firma).to.deep.equal({
+        naziv: 'Devizna Firma',
+        maticniBroj: '12345678',
+        poreskiBroj: '123456789',
+        sifraDelatnosti: '777',
+        adresa: 'Beograd 2',
+        vlasnik: 1
       });
 
-      expect(body.ownerId).to.exist;
+      expect(body.idVlasnika).to.exist;
     });
   });
 
   it('prikazuje company polja samo za poslovnog vlasnika', () => {
-  cy.visit(route, {
-    onBeforeLoad(win) {
-      loginWithClientManage(win);
-    },
-  });
-
-  cy.contains('Korak 1 - Tip računa').should('be.visible');
-
   cy.get('select[formControlName="kind"]').select('Devizni');
   cy.get('select[formControlName="currency"]').select('EUR');
   cy.get('select').filter(':visible').eq(2).select('Lični');
@@ -142,13 +152,6 @@ describe('AccountCreate', () => {
 });
 
 it('ne dozvoljava devizni račun bez izbora valute', () => {
-  cy.visit(route, {
-    onBeforeLoad(win) {
-      loginWithClientManage(win);
-    },
-  });
-
-  cy.contains('Korak 1 - Tip računa').should('be.visible');
   cy.get('select[formControlName="kind"]').select('Devizni');
 
   cy.get('select[formControlName="currency"]').should('be.visible');
@@ -158,6 +161,17 @@ it('ne dozvoljava devizni račun bez izbora valute', () => {
 });
 
   it('TEKUCI flow omogućava Novi klijent i vraća korisnika nazad na formu', () => {
+    // Intercept kreiranja klijenta unutar `user-create.component`
+    cy.intercept('POST', '**/clients/customers*', {
+      statusCode: 201,
+      body: {
+        id: 'new-client-id',
+        ime: 'Test',
+        prezime: 'Klijent',
+        email: 'test@test.com'
+      }
+    }).as('createUser');
+
     // Korak 1
     cy.get('select[formControlName="kind"]').should('be.visible').select('Tekući');
 
@@ -178,24 +192,22 @@ it('ne dozvoljava devizni račun bez izbora valute', () => {
 
     cy.url({ timeout: 10000 }).should('include', '/users/new');
 
-    // Popuni minimalno što forma traži
-    cy.get('body').then(($body) => {
-      if ($body.find('input[name="firstName"]').length) {
-        cy.get('input[name="firstName"]').type('Test');
-      } else if ($body.find('input[formControlName="firstName"]').length) {
-        cy.get('input[formControlName="firstName"]').type('Test');
-      }
+    // Popuni minimalno što forma traži (nova struktura polja na angular form grupi)
+    cy.get('input[name="firstName"], input[formControlName="firstName"]').type('Test');
+    cy.get('input[name="lastName"], input[formControlName="lastName"]').type('Klijent');
+    cy.get('input[name="email"], input[formControlName="email"]').type('test@test.com');
+    cy.get('input[name="phone"], input[formControlName="phone"]').type('064123456');
+    cy.get('input[name="jmbg"], input[formControlName="jmbg"]').type('1234567890123');
+    cy.get('input[name="address"], input[formControlName="address"]').type('Neka adresa 10');
+    cy.get('input[name="dateOfBirth"], input[formControlName="dateOfBirth"]').type('1990-01-01');
+    cy.get('select[name="gender"], select[formControlName="gender"]').select('M');
 
-      if ($body.find('input[name="lastName"]').length) {
-        cy.get('input[name="lastName"]').type('Klijent');
-      } else if ($body.find('input[formControlName="lastName"]').length) {
-        cy.get('input[formControlName="lastName"]').type('Klijent');
-      }
-    });
-
+    // Potvrdi modal formu za novog klijenta - komponenta ga ima kao "Kreiraj"
     cy.contains('button', 'Kreiraj').click();
 
-    cy.url({ timeout: 10000 }).should('include', '/employees/accounts/new');
+    cy.wait('@createUser');
+
+    cy.url({ timeout: 10000 }).should('include', '/accounts/new');
     cy.contains('Korak 2 - Vlasnik', { timeout: 10000 }).should('be.visible');
 
     cy.get('select[formControlName="ownerId"]', { timeout: 10000 })

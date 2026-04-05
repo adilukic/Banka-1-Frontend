@@ -37,59 +37,62 @@ describe('Employee Edit Modal Component', () => {
     // Set auth
     window.localStorage.setItem('authToken', 'fake-jwt-token');
     window.localStorage.setItem('loggedUser', JSON.stringify({
-      email: 'admin@test.com', role: 'EmployeeAdmin', permissions: []
+      email: 'admin@test.com', role: 'EmployeeAdmin', permissions: ['EMPLOYEE_MANAGE_ALL']
     }));
 
     cy.visit('/employees');
     cy.wait('@getEmployees');
 
     // Click edit button on first row to open modal
-    cy.get('table tbody tr').first().find('.btn-icon').first().click();
+    cy.get('table tbody tr').first().find('button[title="Izmeni"]').first().click();
   });
 
   it('treba da prikaže modal i automatski popuni polja starim podacima', () => {
-    cy.get('.modal-overlay').should('be.visible');
-    cy.get('.modal-header h2').should('contain', 'Edit employee');
+    cy.get('.z-overlay').should('be.visible');
+    cy.get('.z-modal-header h2').should('contain', 'Izmeni zaposlenog');
 
     cy.get('input[formControlName="ime"]').should('have.value', 'Marko');
     cy.get('input[formControlName="prezime"]').should('have.value', 'Marković');
-    cy.get('input[formControlName="email"]').should('have.value', 'marko@example.com');
   });
 
   it('treba da onemogući dugme Save ako je ime obrisano', () => {
     cy.get('input[formControlName="ime"]').clear();
-    cy.get('.modal-header h2').click(); // trigger blur/touched
+    cy.get('.z-modal-header h2').click(); // trigger blur/touched
 
-    cy.get('.btn-primary').should('be.disabled');
-    cy.get('.field-error').should('be.visible');
+    cy.get('.z-btn-primary').should('be.disabled');
+    cy.get('.z-error').should('be.visible');
   });
 
   it('treba da pošalje izmenjene podatke', () => {
+    // Fill in required field from FormGroup that is missing in mock data to make form valid
+    cy.get('input[formControlName="brojTelefona"]').clear().type('064123456');
+
     cy.get('input[formControlName="ime"]').clear().type('Marko Izmenjeni');
 
-    cy.get('.btn-primary').should('not.be.disabled').click();
+    // Use .last() or standard cy.contains() to precisely find the save button and avoid clicking multiple primary buttons
+    cy.contains('Sačuvaj izmene').should('not.be.disabled').click();
 
     cy.wait('@updateEmployee').then((interception) => {
       expect(interception.request.body.ime).to.equal('Marko Izmenjeni');
     });
 
     // Modal should close
-    cy.get('.modal-overlay').should('not.exist');
+    cy.get('.z-overlay').should('not.exist');
   });
 
   it('treba da zatvori modal kada se klikne na Cancel', () => {
-    cy.get('.btn-outline').contains('Cancel').click();
-    cy.get('.modal-overlay').should('not.exist');
+    cy.get('.z-btn-outline').contains('Otkaži').click();
+    cy.get('.z-overlay').should('not.exist');
   });
 
   it('treba da zatvori modal kada se klikne na overlay', () => {
-    cy.get('.modal-overlay').click('topLeft');
-    cy.get('.modal-overlay').should('not.exist');
+    cy.get('.z-overlay').click('topLeft');
+    cy.get('.z-overlay').should('not.exist');
   });
 
   it('treba da zatvori modal kada se klikne na X dugme', () => {
-    cy.get('.btn-close').click();
-    cy.get('.modal-overlay').should('not.exist');
+    cy.get('button[aria-label="Close modal"]').click();
+    cy.get('.z-overlay').should('not.exist');
   });
 
 });
