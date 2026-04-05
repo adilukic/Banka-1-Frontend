@@ -186,7 +186,7 @@ export class AccountCardsPlaceholderComponent implements OnInit {
     if (!this.selectedCard || !this.pendingAction || this.isProcessing) return;
 
     this.isProcessing = true;
-    const cardId = this.selectedCard.id;
+    const cardNumber = this.selectedCard.cardNumber;
 
     let action$;
     let successMessage: string;
@@ -194,17 +194,17 @@ export class AccountCardsPlaceholderComponent implements OnInit {
 
     switch (this.pendingAction) {
       case 'BLOCK':
-        action$ = this.cardService.blockCard(cardId);
+        action$ = this.cardService.blockCard(cardNumber);
         successMessage = 'Kartica je uspešno blokirana. Vlasnik će dobiti obaveštenje putem emaila.';
         newStatus = 'BLOKIRANA';
         break;
       case 'UNBLOCK':
-        action$ = this.cardService.unblockCard(cardId);
+        action$ = this.cardService.unblockCard(cardNumber);
         successMessage = 'Kartica je uspešno deblokirana. Vlasnik će dobiti obaveštenje putem emaila.';
         newStatus = 'AKTIVNA';
         break;
       case 'DEACTIVATE':
-        action$ = this.cardService.deactivateCard(cardId);
+        action$ = this.cardService.deactivateCard(cardNumber);
         successMessage = 'Kartica je trajno deaktivirana. Vlasnik će dobiti obaveštenje putem emaila.';
         newStatus = 'DEAKTIVIRANA';
         break;
@@ -214,7 +214,7 @@ export class AccountCardsPlaceholderComponent implements OnInit {
 
     action$.subscribe({
       next: () => {
-        const card = this.cards.find(c => c.id === cardId);
+        const card = this.cards.find(c => c.cardNumber === cardNumber);
         if (card) {
           card.status = newStatus;
         }
