@@ -9,6 +9,8 @@ import { EmployeeEditComponent } from './components/employee-edit/employee-edit.
 import { ActuaryManagementComponent } from './components/actuary-management/actuary-management.component';
 import { AccountManagementComponent } from './account-management/account-management.component';
 import { AccountCardsPlaceholderComponent } from './account-cards-placeholder/account-cards-placeholder.component';
+import { LoanRequestManagementComponent } from './components/loan-request-management/loan-request-management.component';
+import { LoanManagementComponent } from './components/loan-management/loan-management.component';
 import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 
 @NgModule({
@@ -17,7 +19,9 @@ import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.compone
     EmployeeCreateComponent,
     EmployeeEditComponent,
     ActuaryManagementComponent,
-    AccountCardsPlaceholderComponent
+    AccountCardsPlaceholderComponent,
+    LoanRequestManagementComponent,
+    LoanManagementComponent
   ],
   imports: [
     CommonModule,
@@ -28,4 +32,4 @@ import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.compone
     NavbarComponent
   ]
 })
-export class EmployeeModule { }
+export class EmployeeModule {}
