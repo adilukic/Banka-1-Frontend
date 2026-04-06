@@ -59,15 +59,9 @@ export class SecurityDetailComponent implements OnInit, OnDestroy, AfterViewInit
   ) {}
 
   ngOnInit(): void {
+    this.securityType = this.route.snapshot.data['securityType'];
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.ticker = params['ticker'];
-      // Determine type from URL path
-      const url = this.router.url;
-      if (url.includes('/future/')) {
-        this.securityType = 'future';
-      } else {
-        this.securityType = 'forex';
-      }
       this.loadSecurity();
     });
   }

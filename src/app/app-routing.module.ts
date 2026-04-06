@@ -130,12 +130,14 @@ const routes: Routes = [
   {
     path: 'securities/future/:ticker',
     component: SecurityDetailComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: { securityType: 'future' }
   },
   {
     path: 'securities/forex/:ticker',
     component: SecurityDetailComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: { securityType: 'forex' }
   },
   {
     path: '**',

@@ -69,9 +69,7 @@ export class SecuritiesListComponent implements OnInit, OnDestroy {
   setActiveTab(tab: SecurityTab): void {
     if (tab === 'forex' && this.isClient) return;
     this.activeTab = tab;
-    this.currentPage = 0;
     this.clearFilters();
-    this.loadSecurities();
   }
 
   onSearchChange(): void {
