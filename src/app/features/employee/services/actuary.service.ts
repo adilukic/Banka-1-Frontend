@@ -13,8 +13,8 @@ export class ActuaryService {
   constructor(private http: HttpClient) {}
 
   getAgents(
-    page: number = 0,
-    size: number = 10,
+    page = 0,
+    size = 10,
     filters?: { email?: string; ime?: string; prezime?: string; pozicija?: string }
   ): Observable<any> {
     let params = new HttpParams()

@@ -108,7 +108,7 @@ export class AccountManagementComponent implements OnInit {
     this.accountService.getAllAccountsPaginated(0, this.pageSize).subscribe({
       next: (response) => {
         const totalPages = response.totalPages || 1;
-        let loadedPages = 1;
+        const loadedPages = 1;
         const allAccounts: Account[] = this.mapResponseContent(response.content);
 
         if (totalPages === 1) {

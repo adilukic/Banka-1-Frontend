@@ -43,8 +43,8 @@ export class AccountService {
    * Employee endpoint for all accounts in the system with pagination support.
    */
   getAllAccountsPaginated(
-    page: number = 0,
-    size: number = 10,
+    page = 0,
+    size = 10,
   ): Observable<any> {
     const params = new HttpParams()
       .set('page', page.toString())

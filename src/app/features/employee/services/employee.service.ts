@@ -12,14 +12,14 @@ export class EmployeeService {
 
   constructor(private http: HttpClient) {}
 
-  getEmployees(page: number = 0, size: number = 10): Observable<any> {
+  getEmployees(page = 0, size = 10): Observable<any> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
     return this.http.get<any>(this.apiUrl, { params });
   }
 
-  searchEmployees(query: string, page: number = 0, size: number = 10): Observable<any> {
+  searchEmployees(query: string, page = 0, size = 10): Observable<any> {
     const params = new HttpParams()
       .set('query', query)
       .set('page', page.toString())
