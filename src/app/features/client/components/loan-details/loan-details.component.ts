@@ -31,7 +31,7 @@ export class LoanDetailsComponent implements OnInit {
   const loanId = this.route.snapshot.paramMap.get('id');
   if (loanId) {
     // UKLONI znak '+' ispred loanId
-    this.loadLoanDetails(loanId); 
+    this.loadLoanDetails(loanId);
   } else {
     this.hasError = true;
     this.errorMessage = 'ID kredita nije prosleđen.';
@@ -106,13 +106,7 @@ export class LoanDetailsComponent implements OnInit {
   }
   getInstallmentStatusLabel(status: string | undefined): string {
     if (!status) return 'Nepoznato';
-  
-    switch (status) {
-      case 'PAID': return 'Plaćeno';
-      case 'UNPAID': return 'Neplaćeno';
-      case 'LATE': return 'Kasni';
-      default: return status;
-    }
+    return InstallmentStatusLabels[status as keyof typeof InstallmentStatusLabels] || status;
   }
 
   getStatusBadgeClass(status: string | undefined): string {

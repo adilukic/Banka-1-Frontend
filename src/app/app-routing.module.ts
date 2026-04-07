@@ -25,6 +25,7 @@ import { SecurityDetailComponent } from './features/securities/components/securi
 import { StockDetailComponent } from './features/securities/components/stock-detail/stock-detail.component';
 import { LoanListComponent } from './features/client/components/loan-list/loan-list.component';
 import { LoanDetailsComponent } from './features/client/components/loan-details/loan-details.component';
+import { LoanRequestComponent } from './features/client/components/loan-request/loan-request.component';
 
 const routes: Routes = [
   {
@@ -137,6 +138,11 @@ const routes: Routes = [
   {
     path: 'loans',
     component: LoanListComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'loans/request',
+    component: LoanRequestComponent,
     canActivate: [authGuard]
   },
   {
